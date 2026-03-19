@@ -1,11 +1,11 @@
 package ru.mentee.power.crm.domain;
 
 public class Lead {
-  private String id;
-  private String email;
-  private String phone;
-  private String company;
-  private String status;
+  private final String id;
+  private final String email;
+  private final String phone;
+  private final String company;
+  private final String status;
 
   public Lead(String id, String email, String phone, String company, String status) {
     this.id = id;
