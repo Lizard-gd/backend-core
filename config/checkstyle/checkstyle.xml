@@ -1,0 +1,401 @@
+<?xml version="1.0"?>
+<!DOCTYPE module PUBLIC
+        "-//Checkstyle//DTD Checkstyle Configuration 1.3//EN"
+        "https://checkstyle.org/dtds/configuration_1_3.dtd">
+
+<!--
+    Checkstyle Minimal Configuration для DVT-7
+
+    Курс: "Java с нуля до оффера"
+    Спринт: Sprint 3 Dev Tools
+    Аудитория: Новички без опыта программирования
+
+    Стратегия:
+    - 12 critical checks (error) → fail build
+    - 15 pedagogical checks (warning) → показываем, не блокируем
+    - Javadoc/Advanced checks (ignore) → отложено до Sprint 5+
+
+    Gradle config:
+    checkstyle {
+        toolVersion = '10.12.4'
+        maxErrors = 0        // Fail на первом error
+        maxWarnings = 999    // Warnings не fail
+    }
+-->
+
+<module name="Checker">
+
+    <!-- ========== GLOBAL PROPERTIES ========== -->
+
+    <property name="charset" value="UTF-8"/>
+    <property name="severity" value="warning"/> <!-- Default severity для всех checks -->
+    <property name="fileExtensions" value="java"/>
+
+    <!-- Exclude module-info.java (не используется в учебном проекте) -->
+    <module name="BeforeExecutionExclusionFileFilter">
+        <property name="fileNamePattern" value="module\-info\.java$"/>
+    </module>
+
+    <!-- ========== FILE-LEVEL CHECKS ========== -->
+
+    <!--
+        CRITICAL: No tabs allowed (только spaces для индентации)
+
+        Почему error:
+        - Tabs vs Spaces = классическая проблема форматирования
+        - Разный рендеринг в разных редакторах
+        - Google Style требует только spaces
+
+        Пример нарушения:
+        →→public void method() {  // ❌ tab символ
+            return;
+        }
+
+        Правильно:
+          public void method() {  // ✅ 2 spaces
+            return;
+          }
+    -->
+    <module name="FileTabCharacter">
+        <property name="severity" value="error"/>
+        <property name="eachLine" value="true"/>
+    </module>
+
+    <!--
+        WARNING: Line length limit (не fail build в Sprint 3)
+
+        Почему warning:
+        - Новички не знают line wrapping
+        - 101 символ не критичная ошибка для обучения
+        - Показываем проблему, но не блокируем прогресс
+
+        Upgrade path: error в Sprint 5+ (Backend Core)
+    -->
+    <module name="LineLength">
+        <property name="severity" value="warning"/>
+        <property name="max" value="100"/>
+        <property name="ignorePattern" value="^package.*|^import.*|a href|href|https://|https://|ftp://"/>
+    </module>
+
+    <!-- ========== TREE WALKER (код внутри Java файлов) ========== -->
+
+    <module name="TreeWalker">
+
+        <!-- ==================== NAMING CONVENTIONS ==================== -->
+        <!--
+            Приоритет 1: Naming conventions - фундамент читаемого Java кода
+
+            Java соглашения:
+            - Packages: lowercase (com.example.mcrm)
+            - Classes: PascalCase (UserService, CustomerRepository)
+            - Methods: camelCase (getUserById, calculateTotal)
+            - Fields: camelCase (userName, customerAge)
+            - Variables: camelCase (orderCount, totalPrice)
+            - Constants: SCREAMING_SNAKE_CASE (MAX_SIZE, DEFAULT_TIMEOUT)
+
+            Все naming checks = ERROR (основа урока DVT-7)
+        -->
+
+        <!-- Package names: lowercase only -->
+        <module name="PackageName">
+            <property name="severity" value="error"/>
+            <property name="format" value="^[a-z]+(\.[a-z][a-z0-9]*)*$"/>
+            <message key="name.invalidPattern"
+                     value="Package name ''{0}'' must be lowercase (e.g., com.example, not Com.Example)"/>
+        </module>
+
+        <!-- Class/Interface names: PascalCase -->
+        <module name="TypeName">
+            <property name="severity" value="error"/>
+            <property name="format" value="^[A-Z][a-zA-Z0-9]*$"/>
+            <message key="name.invalidPattern"
+                     value="Class name ''{0}'' must be PascalCase (e.g., UserService, not user_service or userService)"/>
+        </module>
+
+        <!-- Method names: camelCase -->
+
+
+        <!-- ==================== IMPORTS ==================== -->
+
+        <!--
+            CRITICAL: No wildcard imports
+
+            Почему error:
+            - import java.util.* скрывает зависимости
+            - Explicit imports улучшают читаемость
+            - Google Style запрещает wildcards
+
+            Плохо:
+            import java.util.*;  // ❌
+
+            Хорошо:
+            import java.util.List;     // ✅
+            import java.util.ArrayList; // ✅
+        -->
+        <module name="AvoidStarImport">
+            <property name="severity" value="error"/>
+        </module>
+
+        <!--
+            WARNING: Import order (not critical для новичков)
+
+            Порядок:
+            1. Static imports
+            2. Standard Java (java.*, javax.*)
+            3. Third-party (org.*, com.*)
+
+            Upgrade path: error в Sprint 7+ (Enterprise standards)
+        -->
+        <module name="CustomImportOrder">
+            <property name="severity" value="warning"/>
+            <property name="sortImportsInGroupAlphabetically" value="true"/>
+            <property name="separateLineBetweenGroups" value="true"/>
+            <property name="customImportOrderRules" value="STATIC###STANDARD_JAVA_PACKAGE###THIRD_PARTY_PACKAGE"/>
+        </module>
+
+        <!-- WARNING: Unused imports (IDE обычно помечает автоматически) -->
+        <module name="UnusedImports">
+            <property name="severity" value="warning"/>
+        </module>
+
+        <!-- ==================== CODE STRUCTURE ==================== -->
+
+        <!--
+            CRITICAL: One top-level class per file
+
+            Почему error:
+            - Основное правило организации кода в Java
+            - Поиск класса по имени файла
+        -->
+        <module name="OneTopLevelClass">
+            <property name="severity" value="error"/>
+        </module>
+
+        <!--
+            CRITICAL: Filename matches outer class name
+
+            Почему error:
+            - UserService.java должен содержать class UserService
+            - Java compilation requirement
+        -->
+        <module name="OuterTypeFilename">
+            <property name="severity" value="error"/>
+        </module>
+
+        <!--
+            CRITICAL: One statement per line
+
+            Почему error:
+            - int x = 1; int y = 2; // ❌ hard to read
+
+            Правильно:
+            int x = 1;  // ✅
+            int y = 2;  // ✅
+        -->
+        <module name="OneStatementPerLine">
+            <property name="severity" value="error"/>
+        </module>
+
+        <!--
+            WARNING: One variable per declaration
+
+            Почему warning:
+            - int x, y, z; // допустимо для новичков
+            - Upgrade к error в Sprint 5+ (production quality)
+        -->
+        <module name="MultipleVariableDeclarations">
+            <property name="severity" value="warning"/>
+        </module>
+
+        <!-- ==================== BRACES & BLOCKS ==================== -->
+
+        <!--
+            CRITICAL: Braces required for if/while/for/do
+
+            Почему error:
+            - Предотвращает Apple SSL bug (goto fail; goto fail;)
+            - Обязательная защита от ошибок
+
+            Плохо:
+            if (condition)
+                doSomething();  // ❌ нет фигурных скобок
+
+            Хорошо:
+            if (condition) {
+                doSomething();  // ✅ всегда с фигурными скобками
+            }
+        -->
+        <module name="NeedBraces">
+            <property name="severity" value="error"/>
+            <property name="allowSingleLineStatement" value="false"/>
+        </module>
+
+        <!--
+            WARNING: Left brace placement (K&R style)
+
+            K&R = end-of-line:
+            if (condition) {  // ✅ same line
+
+            Not Allman:
+            if (condition)
+            {                 // ❌ next line
+        -->
+        <module name="LeftCurly">
+            <property name="severity" value="warning"/>
+            <property name="option" value="eol"/>
+        </module>
+
+        <!-- WARNING: Right brace placement -->
+        <module name="RightCurly">
+            <property name="severity" value="warning"/>
+            <property name="option" value="alone"/>
+            <property name="tokens"
+                      value="CLASS_DEF, METHOD_DEF, CTOR_DEF, LITERAL_FOR, LITERAL_WHILE, STATIC_INIT, INSTANCE_INIT"/>
+        </module>
+
+        <!-- ==================== INDENTATION ==================== -->
+
+        <!--
+            CRITICAL: 2-space indentation (Google Style)
+
+            Почему error:
+            - Консистентный indent критичен для читаемости
+            - 2 spaces (не 4, не tabs)
+
+            Настройки:
+            - basicOffset: 2 (основной indent)
+            - caseIndent: 2 (switch cases)
+            - lineWrappingIndentation: 4 (продолжение длинной строки)
+        -->
+        <module name="Indentation">
+            <property name="severity" value="error"/>
+            <property name="basicOffset" value="2"/>
+            <property name="braceAdjustment" value="0"/>
+            <property name="caseIndent" value="2"/>
+            <property name="throwsIndent" value="4"/>
+            <property name="lineWrappingIndentation" value="4"/>
+            <property name="arrayInitIndent" value="2"/>
+        </module>
+
+        <!-- ==================== WHITESPACE ==================== -->
+        <!--
+            WARNING severity: показываем проблемы, но не блокируем
+
+            Upgrade path: error в Sprint 5+ (professional formatting)
+        -->
+
+        <!-- Whitespace around operators -->
+        <module name="WhitespaceAround">
+            <property name="severity" value="warning"/>
+            <property name="allowEmptyConstructors" value="true"/>
+            <property name="allowEmptyMethods" value="true"/>
+            <property name="allowEmptyTypes" value="true"/>
+            <property name="allowEmptyLoops" value="true"/>
+            <message key="ws.notFollowed"
+                     value="''{0}'' is not followed by whitespace (e.g., 'if (x)' not 'if(x)')"/>
+            <message key="ws.notPreceded"
+                     value="''{0}'' is not preceded by whitespace"/>
+        </module>
+
+        <!-- Whitespace after tokens -->
+        <module name="WhitespaceAfter">
+            <property name="severity" value="warning"/>
+            <property name="tokens" value="COMMA, SEMI, TYPECAST"/>
+        </module>
+
+        <!-- No whitespace before -->
+        <module name="NoWhitespaceBefore">
+            <property name="severity" value="warning"/>
+            <property name="tokens" value="COMMA, SEMI, POST_INC, POST_DEC, DOT, ELLIPSIS, METHOD_REF"/>
+            <property name="allowLineBreaks" value="true"/>
+        </module>
+
+        <!-- Parenthesis padding -->
+        <module name="ParenPad">
+            <property name="severity" value="warning"/>
+            <property name="option" value="nospace"/>
+        </module>
+
+        <!-- Generic whitespace (<T>, List<String>) -->
+        <module name="GenericWhitespace">
+            <property name="severity" value="warning"/>
+        </module>
+
+        <!-- ==================== MISCELLANEOUS ==================== -->
+
+        <!--
+            CRITICAL: Java-style array declarations
+
+            Почему error:
+            - String [] args // ❌ C-style
+            - String[] args  // ✅ Java-style
+        -->
+        <module name="ArrayTypeStyle">
+            <property name="severity" value="error"/>
+        </module>
+
+        <!--
+            WARNING: Empty catch blocks require comment
+
+            Почему warning (не error в Sprint 3):
+            - Новички часто пишут пустые catch для экспериментов
+            - Upgrade к error в Sprint 7 (SQL Core - обработка SQLException)
+        -->
+        <module name="EmptyCatchBlock">
+            <property name="severity" value="warning"/>
+            <property name="exceptionVariableName" value="expected|ignore"/>
+            <property name="commentFormat" value=".*"/>
+        </module>
+
+        <!-- WARNING: Modifier order (public static final) -->
+        <module name="ModifierOrder">
+            <property name="severity" value="warning"/>
+        </module>
+
+        <!-- WARNING: Empty line separator between sections -->
+        <module name="EmptyLineSeparator">
+            <property name="severity" value="warning"/>
+            <property name="allowNoEmptyLineBetweenFields" value="true"/>
+            <property name="allowMultipleEmptyLines" value="false"/>
+            <property name="tokens" value="PACKAGE_DEF, IMPORT, CLASS_DEF, INTERFACE_DEF, ENUM_DEF,
+                STATIC_INIT, INSTANCE_INIT, METHOD_DEF, CTOR_DEF"/>
+        </module>
+
+        <!-- WARNING: Fall through in switch -->
+        <module name="FallThrough">
+            <property name="severity" value="warning"/>
+        </module>
+
+        <!-- WARNING: Upper ell (123L not 123l) -->
+        <module name="UpperEll">
+            <property name="severity" value="warning"/>
+        </module>
+
+        <!-- ==================== OPERATOR WRAPPING ==================== -->
+
+        <!-- WARNING: Operator on new line -->
+        <module name="OperatorWrap">
+            <property name="severity" value="warning"/>
+            <property name="option" value="nl"/>
+            <property name="tokens"
+                      value="BAND, BOR, BSR, BXOR, DIV, EQUAL, GE, GT, LAND, LE, LITERAL_INSTANCEOF, LOR, LT, MINUS, MOD, NOT_EQUAL, PLUS, QUESTION, SL, SR, STAR, METHOD_REF"/>
+        </module>
+
+        <!--
+    Suppression Comments (опционально)
+
+    Позволяет отключить проверки через комментарии:
+
+    // CHECKSTYLE.OFF: LineLength
+    String veryLongStringThatExceeds100CharactersButIsNecessaryForThisSpecificPurpose = "...";
+    // CHECKSTYLE.ON: LineLength
+-->
+        <module name="SuppressionCommentFilter">
+            <property name="offCommentFormat" value="CHECKSTYLE.OFF\: ([\w\|]+)"/>
+            <property name="onCommentFormat" value="CHECKSTYLE.ON\: ([\w\|]+)"/>
+            <property name="checkFormat" value="$1"/>
+        </module>
+
+    </module>
+
+</module>
