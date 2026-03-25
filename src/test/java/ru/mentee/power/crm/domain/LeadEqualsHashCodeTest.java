@@ -1,0 +1,101 @@
+package ru.mentee.power.crm.domain;
+
+import org.junit.jupiter.api.Test;
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.util.HashMap;
+import java.util.Map;
+
+public class LeadEqualsHashCodeTest {
+  @Test
+    void shouldBeReflexive_whenEqualsCalledOnSameObject() {
+      // Given: создаем лида с любыми данными
+    Lead lead = new Lead("1", "ivan@mail.ru", "+7123", "TechCorp", "NEW");
+      // Then: проверяем, что лид равен сам себе
+    assertThat(lead).isEqualTo(lead);
+  }
+
+  @Test
+  void shouldBeSymmetric_whenEqualsCalledOnTwoObjects() {
+      // Given: Даём на проверку с первым второй лид
+    Lead firstLead = new Lead("1", "ivan@mail.ru", "+7123", "TechCorp", "NEW");
+    Lead secondLead = new Lead("1", "ivan@mail.ru", "+7123", "TechCorp", "NEW");
+      // Then: Симметричность — порядок сравнения не важен
+    assertThat(firstLead).isEqualTo(secondLead);
+    assertThat(secondLead).isEqualTo(firstLead);
+  }
+
+  @Test
+  void shouldBeTransitive_whenEqualsChainOfThreeObjects() {
+    Lead firstLead = new Lead("1", "ivan@mail.ru", "+7123", "TechCorp", "NEW");
+    Lead secondLead = new Lead("1", "ivan@mail.ru", "+7123", "TechCorp", "NEW");
+    Lead thirdLead = new Lead("1", "ivan@mail.ru", "+7123", "TechCorp", "NEW");
+
+      // Then: Транзитивность — если A=B и B=C, то A=C
+    assertThat(firstLead).isEqualTo(secondLead);
+    assertThat(secondLead).isEqualTo(thirdLead);
+    assertThat(firstLead).isEqualTo(thirdLead);
+  }
+
+  @Test
+  void shouldBeConsistent_whenEqualsCalledMultipleTimes() {
+    Lead firstLead = new Lead("1", "ivan@mail.ru", "+7123", "TechCorp", "NEW");
+    Lead secondLead = new Lead("1", "ivan@mail.ru", "+7123", "TechCorp", "NEW");
+
+      // Then: Результат одинаковый при многократных вызовах
+    assertThat(firstLead).isEqualTo(secondLead);
+    assertThat(firstLead).isEqualTo(secondLead);
+    assertThat(firstLead).isEqualTo(secondLead);
+  }
+
+  @Test
+  void shouldReturnFalse_whenEqualsComparedWithNull() {
+    Lead lead = new Lead("1", "ivan@mail.ru", "+7123", "TechCorp", "NEW");
+
+      // Then: Объект не равен null (isNotEqualTo проверяет equals(null) = false)
+    assertThat(lead).isNotEqualTo(null);
+  }
+
+  @Test
+  void shouldHaveSameHashCode_whenObjectsAreEqual() {
+    Lead firstLead = new Lead("1", "ivan@mail.ru", "+7123", "TechCorp", "NEW");
+    Lead secondLead = new Lead("1", "ivan@mail.ru", "+7123", "TechCorp", "NEW");
+
+      // Then: Если объекты равны, то hashCode должен быть одинаковым
+    assertThat(firstLead).isEqualTo(secondLead);
+    assertThat(firstLead.hashCode()).isEqualTo(secondLead.hashCode());
+  }
+
+  @Test
+  void shouldWorkInHashMap_whenLeadUsedAsKey() {
+    Lead keyLead = new Lead("1", "ivan@mail.ru", "+7123", "TechCorp", "NEW");
+    Lead lookupLead = new Lead("1", "ivan@mail.ru", "+7123", "TechCorp", "NEW");
+
+    Map<Lead, String> map = new HashMap<>();
+    map.put(keyLead, "CONTACTED");
+
+      // When: Получаем значение по другому объекту с тем же id
+    String status = map.get(lookupLead);
+
+      // Then: HashMap нашел значение благодаря equals/hashCode
+    assertThat(status).isEqualTo("CONTACTED");
+  }
+
+  @Test
+  void shouldNotBeEqual_whenIdsAreDifferent() {
+    Lead firstLead = new Lead("1", "ivan@mail.ru", "+7123", "TechCorp", "NEW");
+    Lead differentLead = new Lead("2", "ivan@mail.ru", "+7123", "TechCorp", "NEW");
+
+      // Then: Разные id = разные объекты (isNotEqualTo использует equals() внутри)
+    assertThat(firstLead).isNotEqualTo(differentLead);
+  }
+
+  @Test
+  void shouldBeEqual_whenOnlyIdMatches_otherFieldsCanBeDifferent() {
+    Lead firstLead = new Lead("1", "ivan@mail.ru", "+7123", "TechCorp", "NEW");
+    Lead secondLead = new Lead ("1", "alan@mail.ru", "+7321", "CorpPork", "OLD");
+
+    assertThat(firstLead).isEqualTo(secondLead);
+    assertThat(firstLead.hashCode()).isEqualTo(secondLead.hashCode());
+  }
+}
