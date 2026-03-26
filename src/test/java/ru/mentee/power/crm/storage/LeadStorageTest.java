@@ -3,16 +3,22 @@ package ru.mentee.power.crm.storage;
 import org.junit.jupiter.api.Test;
 import ru.mentee.power.crm.domain.Lead;
 
+import java.util.UUID;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 public class LeadStorageTest {
 
+  private static final UUID TEST_ID_1 = UUID.fromString("00000000-0000-0000-0000-000000000001");
+  private static final UUID TEST_ID_2 = UUID.fromString("00000000-0000-0000-0000-000000000002");
+  private static final UUID TEST_ID_3 = UUID.fromString("00000000-0000-0000-0000-000000000003");
+
   @Test
     void shouldAddLead_whenLeadIsUnique() {
         // Given: создаем пустое хранилище и уникального лида
     LeadStorage storage = new LeadStorage();
-    Lead uniqueLead = new Lead("1", "ivan@mail.ru", "+7123", "TechCorp", "NEW");
+    Lead uniqueLead = new Lead(TEST_ID_1, "ivan@mail.ru", "+7123", "TechCorp", "NEW");
 
         // When: добавляем лида
     boolean added = storage.add(uniqueLead);
@@ -27,8 +33,8 @@ public class LeadStorageTest {
     void shouldRejectDuplicate_whenEmailAlreadyExists() {
         // Given: хранилище с существующим лидом
     LeadStorage storage = new LeadStorage();
-    Lead existingLead = new Lead("1", "ivan@mail.ru", "+7123", "TechCorp", "NEW");
-    Lead duplicateLead = new Lead("2", "ivan@mail.ru", "+7456", "Other", "NEW");
+    Lead existingLead = new Lead(TEST_ID_1, "ivan@mail.ru", "+7123", "TechCorp", "NEW");
+    Lead duplicateLead = new Lead(TEST_ID_2, "ivan@mail.ru", "+7456", "Other", "NEW");
     storage.add(existingLead); // добавляем первого лида
 
         // When: пытаемся добавить дубликат (такой же email)
@@ -45,10 +51,11 @@ public class LeadStorageTest {
         // Given: заполняем хранилище 100 лидами
     LeadStorage storage = new LeadStorage();
     for (int i = 0; i < 100; i++) {
-      storage.add(new Lead(String.valueOf(i), "lead" + i + "@mail.ru", "+7000", "Company", "NEW"));
+      storage.add(new Lead(UUID.randomUUID(), "lead" + i + "@mail.ru", "+7000", "Company", "NEW"));
     }
         // When + Then: пытаемся добавить 101-й лид, ожидаем исключение
-    Lead hundredFirstLead = new Lead("101", "lead101@mail.ru", "+7001", "Company", "NEW");
+    Lead hundredFirstLead =
+            new Lead(UUID.randomUUID(), "lead101@mail.ru", "+7001", "Company", "NEW");
 
     assertThatThrownBy(() -> storage.add(hundredFirstLead))
           .isInstanceOf(IllegalStateException.class)
@@ -59,8 +66,8 @@ public class LeadStorageTest {
     void shouldReturnOnlyAddedLeads_whenFindAllCalled() {
         // Given: хранилище с двумя добавленными лидами
     LeadStorage storage = new LeadStorage();
-    Lead firstLead = new Lead("1", "ivan@mail.ru", "+7123", "TechCorp", "NEW");
-    Lead secondLead = new Lead("2", "maria@startup.io", "+7456", "StartupLab", "NEW");
+    Lead firstLead = new Lead(TEST_ID_1, "ivan@mail.ru", "+7123", "TechCorp", "NEW");
+    Lead secondLead = new Lead(TEST_ID_2, "maria@startup.io", "+7456", "StartupLab", "NEW");
     storage.add(firstLead);
     storage.add(secondLead);
 
