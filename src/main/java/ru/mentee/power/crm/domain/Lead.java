@@ -1,9 +1,10 @@
 package ru.mentee.power.crm.domain;
 
 import java.util.Objects;
+import java.util.UUID;
 
 public class Lead {
-  private final String id;
+  private final UUID id;
   private final String email;
   private final String phone;
   private final String company;
@@ -26,7 +27,7 @@ public class Lead {
     return Objects.hashCode(id);
   }
 
-  public Lead(String id, String email, String phone, String company, String status) {
+  public Lead(UUID id, String email, String phone, String company, String status) {
     this.id = id;
     this.email = email;
     this.phone = phone;
@@ -34,7 +35,7 @@ public class Lead {
     this.status = status;
   }
 
-  public String getId() {
+  public UUID getId() {
     return id;
   }
 
