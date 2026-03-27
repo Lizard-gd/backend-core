@@ -1,14 +1,22 @@
 package ru.mentee.power.crm.domain;
 
-import java.util.Objects;
 import java.util.UUID;
 
-public class Lead {
-  private final UUID id;
-  private final String email;
-  private final String phone;
-  private final String company;
-  private final String status;
+public record Lead(UUID id, Contact contact, String company, String status) {
+  public Lead {
+    if (id == null) {
+      throw new IllegalArgumentException("Id cannot be null");
+    }
+    if (contact == null) {
+      throw new IllegalArgumentException("Contact cannot be null");
+    }
+    if (status == null) {
+      throw new IllegalArgumentException("Status cannot be null");
+    }
+    if (!(status.equals("NEW") || status.equals("QUALIFIED") || status.equals("CONVERTED"))) {
+      throw new IllegalArgumentException("Status must be NEW, QUALIFIED or CONVERTED");
+    }
+  }
 
   @Override
   public boolean equals(Object o) {
@@ -19,50 +27,11 @@ public class Lead {
       return false;
     }
     Lead lead = (Lead) o;
-    return Objects.equals(id, lead.id);
+    return id.equals(lead.id);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hashCode(id);
-  }
-
-  public Lead(UUID id, String email, String phone, String company, String status) {
-    this.id = id;
-    this.email = email;
-    this.phone = phone;
-    this.company = company;
-    this.status = status;
-  }
-
-  public UUID getId() {
-    return id;
-  }
-
-  public String getEmail() {
-    return email;
-  }
-
-  public String getPhone() {
-    return phone;
-  }
-
-  public String getCompany() {
-    return company;
-  }
-
-  public String getStatus() {
-    return status;
-  }
-
-  @Override
-  public String toString() {
-    return "Lead{"
-                + "id='" + id + '\''
-                + ", email='" + email + '\''
-                + ", phone='" + phone + '\''
-                + ", company='" + company + '\''
-                + ", status='" + status + '\''
-                + '}';
+    return id.hashCode();
   }
 }
