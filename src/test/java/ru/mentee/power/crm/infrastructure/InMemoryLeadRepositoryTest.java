@@ -25,7 +25,7 @@ class InMemoryLeadRepositoryTest {
   }
 
   @Test
-  void addUnique_shouldAddLead() { //Добавление уникального лида
+  void addUnique_shouldAddLead() {
     Lead lead = new Lead(UUID.randomUUID(), testContact, "Company", "NEW");
 
     repository.add(lead);
@@ -35,7 +35,7 @@ class InMemoryLeadRepositoryTest {
   }
 
   @Test
-  void addDuplicate_shouldNotAdd() { //Дубликат не добавляется
+  void addDuplicate_shouldNotAdd() {
     UUID id = UUID.randomUUID();
     Lead lead1 = new Lead(id, testContact, "Company", "NEW");
     Lead lead2 = new Lead(id, testContact, "Company", "NEW");
@@ -47,7 +47,7 @@ class InMemoryLeadRepositoryTest {
   }
 
   @Test
-  void findById_shouldReturnLead_whenExists() { // Поиск существующего лида
+  void findById_shouldReturnLead_whenExists() {
     Lead lead = new Lead(UUID.randomUUID(), testContact, "Company", "NEW");
     repository.add(lead);
 
@@ -58,7 +58,7 @@ class InMemoryLeadRepositoryTest {
   }
 
   @Test
-  void findById_shouldReturnEmpty_whenNotExists() { // Поиск отсутствующего лида
+  void findById_shouldReturnEmpty_whenNotExists() {
     UUID nonExistendId = UUID.randomUUID();
 
     Optional<Lead> found = repository.findById(nonExistendId);
@@ -67,7 +67,7 @@ class InMemoryLeadRepositoryTest {
   }
 
   @Test
-  void remove_shouldDeleteLead() { //Удаление работает
+  void remove_shouldDeleteLead() {
     Lead lead = new Lead(UUID.randomUUID(), testContact, "Company", "NEW");
     repository.add(lead);
     assertThat(repository.findAll()).hasSize(1);
@@ -79,7 +79,7 @@ class InMemoryLeadRepositoryTest {
   }
 
   @Test
-  void findAll_shouldReturnDefensiveCopy() { //Возвращается копия списка
+  void findAll_shouldReturnDefensiveCopy() {
     Lead lead = new Lead(UUID.randomUUID(), testContact, "Company", "NEW");
     repository.add(lead);
 
