@@ -1,12 +1,12 @@
 package ru.mentee.power.crm.infrastructure;
 
-import ru.mentee.power.crm.domain.Lead;
-import ru.mentee.power.crm.domain.Repository;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+
+import ru.mentee.power.crm.domain.Lead;
+import ru.mentee.power.crm.domain.Repository;
 
 public class InMemoryLeadRepository implements Repository<Lead> {
   private final List<Lead> storage = new ArrayList<>();

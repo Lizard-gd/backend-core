@@ -1,10 +1,10 @@
 package ru.mentee.power.crm.core;
 
-import ru.mentee.power.crm.domain.Lead;
-
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.Collections;
+
+import ru.mentee.power.crm.domain.Lead;
 
 public class LeadRepository {
   private final Set<Lead> leads = new HashSet<>();

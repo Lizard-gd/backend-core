@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -23,18 +24,18 @@ public class LeadRepositoryTest {
     Lead lead = new Lead("1", "ivan@mail.ru", "+71234", "TestCorp", "NEW");
 
     repository.save(lead);
-    Lead found = repository.findById("1");
+    Optional<Lead> found = repository.findById("1");
 
-    assertThat(found).isNotNull();
-    assertThat(found.email()).isEqualTo("ivan@mail.ru");
+    assertThat(found).isPresent();
+    assertThat(found.get().email()).isEqualTo("ivan@mail.ru");
   }
 
   @Test
   void shouldReturnNull_whenLeadNotFound() {
 
-    Lead found = repository.findById("unknown-id");
+    Optional<Lead> found = repository.findById("unknown-id");
 
-    assertThat(found).isNull();
+    assertThat(found).isEmpty();
   }
 
   @Test
@@ -59,7 +60,7 @@ public class LeadRepositoryTest {
 
     repository.delete("1");
 
-    assertThat(repository.findById("1")).isNull();
+    assertThat(repository.findById("1")).isEmpty();
     assertThat(repository.size()).isEqualTo(0);
   }
 
@@ -72,7 +73,7 @@ public class LeadRepositoryTest {
     repository.save(lead2);
 
     assertThat(repository.size()).isEqualTo(1);
-    assertThat(repository.findById("1").email()).isEqualTo("pavel@mail.ru");
+    assertThat(repository.findById("1").get().email()).isEqualTo("pavel@mail.ru");
   }
 
   @Test
@@ -88,7 +89,7 @@ public class LeadRepositoryTest {
     String targetId = "500";
 
     long mapStart = System.nanoTime();
-    Lead foundInMap = repository.findById(targetId);
+    Optional<Lead> foundInMap = repository.findById(targetId);
     long mapDuration = System.nanoTime() - mapStart;
 
     long listStart = System.nanoTime();
@@ -98,7 +99,7 @@ public class LeadRepositoryTest {
             .orElse(null);
     long listDuration = System.nanoTime() - listStart;
 
-    assertThat(foundInMap).isEqualTo(foundInList);
+    assertThat(foundInMap.get()).isEqualTo(foundInList);
 
     assertThat(listDuration).isGreaterThan(mapDuration * 10);
 
