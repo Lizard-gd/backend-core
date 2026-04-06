@@ -86,3 +86,7 @@ jacocoTestCoverageVerification {
 check {
     dependsOn jacocoTestCoverageVerification
 }
+
+application {
+    mainClass = 'ru.mentee.power.crm.Main'
+}
