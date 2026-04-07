@@ -16,6 +16,9 @@ ext {
     junitVersion = '5.11.0'
     assertjVersion = '3.27.7'
     lombokVersion = '1.18.44'
+
+    servletVersion = '6.1.0'
+    tomcatVersion = '11.0.20'
 }
 
     dependencies {
@@ -33,6 +36,9 @@ ext {
     // Mockito для тестов
     testImplementation 'org.mockito:mockito-core:5.23.0'
     testImplementation 'org.mockito:mockito-junit-jupiter:5.23.0'
+
+    implementation "jakarta.servlet:jakarta.servlet-api:${servletVersion}"
+    implementation "org.apache.tomcat.embed:tomcat-embed-core:${tomcatVersion}"
 }
 
 checkstyle {
