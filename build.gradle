@@ -3,6 +3,7 @@ plugins {
     id 'application'
     id 'checkstyle'
     id 'jacoco'
+    id 'gg.jte.gradle' version '3.2.3'
 }
 
 group = 'ru.mentee.power'
@@ -19,6 +20,8 @@ ext {
 
     servletVersion = '6.1.0'
     tomcatVersion = '11.0.20'
+
+    jteVersion = '3.2.3'
 }
 
     dependencies {
@@ -39,6 +42,9 @@ ext {
 
     implementation "jakarta.servlet:jakarta.servlet-api:${servletVersion}"
     implementation "org.apache.tomcat.embed:tomcat-embed-core:${tomcatVersion}"
+
+    implementation "gg.jte:jte:${jteVersion}"
+    implementation "gg.jte:jte-runtime:${jteVersion}"
 }
 
 checkstyle {
@@ -63,6 +69,8 @@ test {
     testLogging {
         events "passed", "skipped", "failed"
     }
+    maxHeapSize = "1G"
+    systemProperty "junit.jupiter.execution.parallel.enabled", "false"
 }
 
 // Настройка JaCoCo отчёта
@@ -95,4 +103,10 @@ check {
 
 application {
     mainClass = 'ru.mentee.power.crm.Main'
+}
+
+jte {
+    sourceDirectory = file("src/main/jte").toPath()
+    contentType = gg.jte.ContentType.Html
+    binaryStaticContent = false
 }

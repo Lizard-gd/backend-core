@@ -1,13 +1,18 @@
 package ru.mentee.power.crm.servlet;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.lang.reflect.Field;
 import java.util.List;
+import java.util.Map;
 
+import gg.jte.TemplateEngine;
+import gg.jte.output.PrintWriterOutput;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -20,6 +25,7 @@ import ru.mentee.power.crm.model.Lead;
 import ru.mentee.power.crm.service.LeadService;
 
 @ExtendWith(MockitoExtension.class)
+@SuppressWarnings("unchecked")
 class LeadListServletTest {
 
   @Mock
@@ -34,20 +40,40 @@ class LeadListServletTest {
   @Mock
   private LeadService leadService;
 
-  private TestableLeadListServlet servlet;
+  @Mock
+  private TemplateEngine templateEngine;
+
+  private LeadListServlet servlet;
   private StringWriter stringWriter;
   private PrintWriter printWriter;
 
+  // Расширяем сервлет для тестирования
   private static class TestableLeadListServlet extends LeadListServlet {
     private ServletContext mockServletContext;
+    private TemplateEngine mockTemplateEngine;
 
     void setMockServletContext(ServletContext context) {
       this.mockServletContext = context;
     }
 
+    void setMockTemplateEngine(TemplateEngine engine) {
+      this.mockTemplateEngine = engine;
+    }
+
     @Override
-  public ServletContext getServletContext() {
+    public ServletContext getServletContext() {
       return mockServletContext;
+    }
+
+    @Override
+    public void init() {
+      try {
+        Field templateEngineField = LeadListServlet.class.getDeclaredField("templateEngine");
+        templateEngineField.setAccessible(true);
+        templateEngineField.set(this, mockTemplateEngine);
+      } catch (Exception e) {
+        throw new RuntimeException(e);
+      }
     }
   }
 
@@ -58,43 +84,43 @@ class LeadListServletTest {
     when(response.getWriter()).thenReturn(printWriter);
 
     servlet = new TestableLeadListServlet();
-    servlet.setMockServletContext(servletContext);
+    ((TestableLeadListServlet) servlet).setMockServletContext(servletContext);
+    ((TestableLeadListServlet) servlet).setMockTemplateEngine(templateEngine);
+    servlet.init();
+
+    when(servletContext.getAttribute("leadService")).thenReturn(leadService);
   }
 
   @Test
   void shouldSetContentTypeToHtml_whenDoGetCalled() throws Exception {
-        // Given
-    when(servletContext.getAttribute("leadService")).thenReturn(leadService);
+    // Given
     when(leadService.findAll()).thenReturn(List.of());
 
-        // When
+    // When
     servlet.doGet(request, response);
 
-        // Then
+    // Then
     verify(response).setContentType("text/html; charset=UTF-8");
   }
 
   @Test
-  void shouldGenerateHtmlTable_whenDoGetCalledWithLeads() throws Exception {
-        // Given: создаем тестовых лидов
+  void shouldCallTemplateEngineRender_whenDoGetCalled() throws Exception {
+    // Given
     List<Lead> testLeads = List.of(
-                new Lead("1", "test1@example.com", "+111", "Company A", "NEW"),
-                new Lead("2", "test2@example.com", "+222", "Company B", "QUALIFIED")
-        );
+            new Lead("1", "test1@example.com", "+111", "Company A", "NEW"),
+            new Lead("2", "test2@example.com", "+222", "Company B", "QUALIFIED")
+    );
 
-    when(servletContext.getAttribute("leadService")).thenReturn(leadService);
     when(leadService.findAll()).thenReturn(testLeads);
 
-        // When
+    // When
     servlet.doGet(request, response);
 
-        // Then
-    printWriter.flush();
-    String html = stringWriter.toString();
-
-    assertThat(html).contains("<table");
-    assertThat(html).contains("test1@example.com");
-    assertThat(html).contains("Company B");
-    assertThat(html).contains("QUALIFIED");
+    // Then
+    verify(templateEngine).render(
+            eq("leads/list.jte"),
+            any(Map.class),
+            any(PrintWriterOutput.class)
+    );
   }
 }
