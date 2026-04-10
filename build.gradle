@@ -53,6 +53,9 @@ ext {
     // Sprint 5: Spring Boot Stack (BCORE-14)
     implementation 'org.springframework.boot:spring-boot-starter-web'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
+
+    // JTE интеграция для Spring Boot
+    implementation "gg.jte:jte-spring-boot-starter-3:${jteVersion}"
 }
 
 checkstyle {

@@ -6,8 +6,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import org.springframework.stereotype.Repository;
 import ru.mentee.power.crm.model.Lead;
 
+@Repository
 public class LeadRepository {
   private final Map<String, Lead> storage = new HashMap<>();
 
