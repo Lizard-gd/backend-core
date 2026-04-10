@@ -1,6 +1,15 @@
 server:
   port: 8081
 
+gg:
+  jte:
+    templateLocation: src/main/resources/jte/
+    developmentMode: true
+
 spring:
   application:
     name: mentee-power-crm
+
+logging:
+  level:
+    org.springframework.web: DEBUG
