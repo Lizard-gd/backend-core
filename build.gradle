@@ -116,6 +116,23 @@ application {
     mainClass = 'ru.mentee.power.crm.Main'
 }
 
+// Запуск Servlet стека (Main.java) на порту 8080
+tasks.register('runServlet', JavaExec) {
+    group = 'application'
+    description = 'Run Servlet stack (Main.java) on port 8080'
+    mainClass = 'ru.mentee.power.crm.Main'
+    classpath = sourceSets.main.runtimeClasspath
+}
+
+// Запуск Spring стека (Application.java) на порту 8081
+tasks.register('runSpring', JavaExec) {
+    group = 'application'
+    description = 'Run Spring stack (Application.java) on port 8081'
+    mainClass = 'ru.mentee.power.crm.spring.Application'
+    classpath = sourceSets.main.runtimeClasspath
+    systemProperty 'server.port', '8081'
+}
+
 jte {
     sourceDirectory = file("src/main/jte").toPath()
     contentType = gg.jte.ContentType.Html
