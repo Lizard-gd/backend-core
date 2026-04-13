@@ -3,6 +3,7 @@ package ru.mentee.power.crm.service;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 import ru.mentee.power.crm.model.Lead;
@@ -32,6 +33,12 @@ public class LeadService {
 
   public List<Lead> findAll() {
     return repository.findAll();
+  }
+
+  public List<Lead> findByStatus(String status) {
+    return repository.findAll().stream()
+            .filter(lead -> lead.status().equals(status))
+            .collect(Collectors.toList());
   }
 
   public Optional<Lead> findById(String id) {
