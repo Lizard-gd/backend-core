@@ -20,6 +20,11 @@
 "bg-blue-600 text-white" : "bg-gray-200 text-gray-700"} hover:bg-blue-500 hover:text-white transition">
                 QUALIFIED
             </a>
+            <a href="/leads/new"
+               class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
+               >
+                + Добавить лида
+            </a>
         </div>
 
         @if(currentFilter != null)
