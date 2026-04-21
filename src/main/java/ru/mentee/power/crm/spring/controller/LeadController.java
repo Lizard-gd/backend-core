@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import ru.mentee.power.crm.model.Lead;
 import ru.mentee.power.crm.service.LeadService;
 
@@ -47,5 +48,11 @@ public class LeadController {
     model.addAttribute("leads", leads);
     model.addAttribute("currentFilter", status);
     return "leads/list";
+  }
+
+  @GetMapping("/")
+  @ResponseBody
+  public String home() {
+    return "Spring Boot CRM is running! Beans created: " + leadService.findAll().size() + " leads.";
   }
 }
