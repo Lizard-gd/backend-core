@@ -56,6 +56,8 @@ ext {
 
     // JTE интеграция для Spring Boot
     implementation "gg.jte:jte-spring-boot-starter-3:${jteVersion}"
+
+    testImplementation 'org.springframework.boot:spring-boot-starter-webmvc-test'
 }
 
 checkstyle {
