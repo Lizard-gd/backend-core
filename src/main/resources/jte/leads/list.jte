@@ -41,6 +41,7 @@
                     <th class="px-4 py-2 text-left">Phone</th>
                     <th class="px-4 py-2 text-left">Company</th>
                     <th class="px-4 py-2 text-left">Status</th>
+                    <th class="px-4 py-2 text-left">Действия</th>
                 </tr>
                 </thead>
                 <tbody>
@@ -53,6 +54,9 @@
                             <span class="px-2 py-1 rounded text-sm ${lead.status().equals("NEW") ? "bg-green-100 text-green-800" : lead.status().equals("QUALIFIED") ? "bg-yellow-100 text-yellow-800" : "bg-blue-100 text-blue-800"}">
                                 ${lead.status()}
                             </span>
+                        </td>
+                        <td class="px-4 py-2">
+                            <a href="/leads/${lead.id()}/edit" class="text-blue-600 hover:underline">Редактировать</a>
                         </td>
                     </tr>
                 @endfor

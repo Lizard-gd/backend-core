@@ -58,4 +58,15 @@ public class LeadService {
   public  Optional<Lead> findByEmail(String email) {
     return repository.findByEmail(email);
   }
+
+  public Lead update(String id, Lead updatedLead) {
+    Optional<Lead> existing = repository.findById(id);
+    if (existing.isEmpty()) {
+      throw new IllegalArgumentException("Lead not found with id: " + id);
+    }
+    Lead leadToSave = new Lead(id, updatedLead.email(), updatedLead.phone(),
+            updatedLead.company(), updatedLead.status());
+    repository.save(leadToSave);
+    return leadToSave;
+  }
 }
