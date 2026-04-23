@@ -2,6 +2,8 @@ package ru.mentee.power.crm.spring.controller;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -17,8 +19,10 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
+import org.springframework.http.HttpStatus;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.web.server.ResponseStatusException;
 import ru.mentee.power.crm.model.Lead;
 import ru.mentee.power.crm.service.LeadService;
 
@@ -64,5 +68,28 @@ class LeadControllerEditTest {
 
     mockMvc.perform(get("/leads/non-existent/edit"))
               .andExpect(status().isNotFound());
+  }
+
+  @Test
+  void shouldDeleteLeadAndRedirect() throws Exception {
+    String leadId = "123";
+    doNothing().when(leadService).delete(leadId);
+
+    mockMvc.perform(post("/leads/{id}/delete", leadId))
+            .andExpect(status().is3xxRedirection())
+            .andExpect(redirectedUrl("/leads"));
+
+    verify(leadService).delete(leadId);
+
+  }
+
+  @Test
+  void shouldReturn404WhenLeadNotFound_forDelete() throws Exception {
+    String nonExistentId = "non-existent";
+    doThrow(new ResponseStatusException(HttpStatus.NOT_FOUND, "Lead not found"))
+            .when(leadService).delete(nonExistentId);
+
+    mockMvc.perform(post("/leads/{id}/delete", nonExistentId))
+            .andExpect(status().isNotFound());
   }
 }
