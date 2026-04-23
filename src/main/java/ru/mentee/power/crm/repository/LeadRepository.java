@@ -33,14 +33,14 @@ public class LeadRepository {
     return new ArrayList<>(storage.values());
   }
 
-  public void delete(String id) {
-    Lead lead = storage.remove(id);
-    if (lead != null) {
-      emailIndex.remove(lead.email());
-    }
-  }
-
   public int size() {
     return storage.size();
+  }
+
+  public void delete(String id) {
+    Lead removed = storage.remove(id);
+    if (removed != null) {
+      emailIndex.remove(removed.email());
+    }
   }
 }

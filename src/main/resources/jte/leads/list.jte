@@ -57,6 +57,10 @@
                         </td>
                         <td class="px-4 py-2">
                             <a href="/leads/${lead.id()}/edit" class="text-blue-600 hover:underline">Редактировать</a>
+                            <form method="post" action="/leads/${lead.id()}/delete" class="inline ml-2"
+                                  onclick="return confirm('Удалить лида ${lead.email()}?')">
+                                <button type="submit" class="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700">Удалить</button>
+                            </form>
                         </td>
                     </tr>
                 @endfor

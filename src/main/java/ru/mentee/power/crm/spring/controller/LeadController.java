@@ -76,4 +76,10 @@ public class LeadController {
     leadService.update(id, updatedLead);
     return "redirect:/leads";
   }
+
+  @PostMapping("/leads/{id}/delete")
+  public String delete(@PathVariable String id) {
+    leadService.delete(id);
+    return "redirect:/leads";
+  }
 }
