@@ -1,7 +1,50 @@
 @param java.util.List<ru.mentee.power.crm.model.Lead> leads
 @param java.lang.String currentFilter
+@param java.lang.String search
+@param java.lang.String status
 
 @template.layout.main(content = @`
+    <div class="mb-6 bg-white shadow rounded-lg p-4">
+        <form method="get" action="/leads" class="flex flex-wrap gap-4 items-end">
+            <div class="flex-1 min-w-[200px]">
+                <label class="block text-sm font-medium text-gray-700">Поиск по имени или email</label>
+                @if(search != null)
+                    <input type="text" name="search" value="${search}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                @else
+                    <input type="text" name="search" value="" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                @endif
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Статус</label>
+                <select name="status" class="mt-1 block rounded-md border-gray-300 shadow-sm">
+                    @if(status == null || "".equals(status))
+                        <option value="" selected>Все статусы</option>
+                    @else
+                        <option value="">Все статусы</option>
+                    @endif
+                    @if("NEW".equals(status))
+                        <option value="NEW" selected>NEW</option>
+                    @else
+                        <option value="NEW">NEW</option>
+                    @endif
+                    @if("CONTACTED".equals(status))
+                        <option value="CONTACTED" selected>CONTACTED</option>
+                    @else
+                        <option value="CONTACTED">CONTACTED</option>
+                    @endif
+                    @if("QUALIFIED".equals(status))
+                        <option value="QUALIFIED" selected>QUALIFIED</option>
+                    @else
+                        <option value="QUALIFIED">QUALIFIED</option>
+                    @endif
+                </select>
+            </div>
+            <div class="flex gap-2">
+                <button type="submit" class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700">Применить</button>
+                <a href="/leads" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300">Сбросить</a>
+            </div>
+        </form>
+    </div>
     <div class="bg-white rounded-lg shadow-md p-6">
         <div class="mb-6 flex flex-wrap gap-2">
             <a href="/leads" class="px-4 py-2 rounded ${currentFilter == null ?

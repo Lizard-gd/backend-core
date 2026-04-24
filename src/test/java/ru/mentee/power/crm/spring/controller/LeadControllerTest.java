@@ -2,15 +2,12 @@ package ru.mentee.power.crm.spring.controller;
 
 import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
-
-import java.util.List;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +17,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import ru.mentee.power.crm.service.LeadService;
 
 @WebMvcTest(LeadController.class)
-public class LeadConrollerTest {
+public class LeadControllerTest {
   @Autowired
   private MockMvc mockMvc;
 
@@ -50,7 +47,6 @@ public class LeadConrollerTest {
 
   @Test
   void shouldShowLeadsWithStatusFilter() throws Exception {
-    when(leadService.findByStatus("QUALIFIED")).thenReturn(List.of());
 
     mockMvc.perform(get("/leads").param("status", "QUALIFIED"))
               .andExpect(status().isOk())
@@ -58,18 +54,45 @@ public class LeadConrollerTest {
               .andExpect(model().attributeExists("leads"))
               .andExpect(model().attribute("currentFilter", "QUALIFIED"));
 
-    verify(leadService).findByStatus("QUALIFIED");
+    verify(leadService).findLeads(null, "QUALIFIED");
   }
 
   @Test
   void shouldShowAllLeadsWhenNoStatus() throws Exception {
-    when(leadService.findAll()).thenReturn(List.of());
 
     mockMvc.perform(get("/leads"))
               .andExpect(status().isOk())
               .andExpect(view().name("leads/list"))
               .andExpect(model().attribute("currentFilter", nullValue()));
 
-    verify(leadService).findAll();
+    verify(leadService).findLeads(null, null);
+  }
+
+  @Test
+  void shouldCallFindLeadsWithSearchAndStatus_whenBothParamsProvided() throws Exception {
+    mockMvc.perform(get("/leads")
+                    .param("search", "ivan")
+                    .param("status", "NEW"))
+            .andExpect(status().isOk())
+            .andExpect(view().name("leads/list"));
+
+    verify(leadService).findLeads("ivan", "NEW");
+  }
+
+  @Test
+  void shouldCallFindLeadsWithOnlySearch_whenOnlySearchProvided() throws Exception {
+    mockMvc.perform(get("/leads")
+                    .param("search", "john"))
+            .andExpect(status().isOk());
+
+    verify(leadService).findLeads("john", null);
+  }
+
+  @Test
+  void shouldCallFindLeadsWithNullParams_whenNoParams() throws Exception {
+    mockMvc.perform(get("/leads"))
+            .andExpect(status().isOk());
+
+    verify(leadService).findLeads(null, null);
   }
 }

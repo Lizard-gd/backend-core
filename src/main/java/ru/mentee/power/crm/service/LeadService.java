@@ -78,4 +78,19 @@ public class LeadService {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Lead not found with id: " + id);
     } repository.delete(id);
   }
+
+  public List<Lead> findLeads(String search, String status) {
+    List<Lead> allLeads = repository.findAll();
+
+    java.util.stream.Stream<Lead> stream = allLeads.stream();
+
+    if (search != null && !search.isBlank()) {
+      String lowerSearch = search.toLowerCase();
+      stream = stream.filter(lead -> lead.email().toLowerCase().contains(lowerSearch));
+    }
+    if (status != null && !status.isBlank()) {
+      stream = stream.filter(lead -> lead.status().equals(status));
+    }
+    return stream.collect(java.util.stream.Collectors.toList());
+  }
 }
