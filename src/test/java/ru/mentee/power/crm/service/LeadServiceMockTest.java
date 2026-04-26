@@ -10,6 +10,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -38,7 +39,8 @@ public class LeadServiceMockTest {
   void shouldCallRepositorySave_whenAddingNewLead() {
     when(mockRepository.findByEmail(anyString())).thenReturn(Optional.empty());
 
-    Lead result = service.addLead("test@example.com", "+123456789", "Test Corp", "NEW");
+    Lead result = service.addLead("TestUser", "test@example.com",
+            "+123456789", "Test Corp", "NEW");
 
     verify(mockRepository, times(1)).save(any(Lead.class));
     assertThat(result.email()).isEqualTo("test@example.com");
@@ -47,12 +49,15 @@ public class LeadServiceMockTest {
 
   @Test
   void shouldNotCallSave_whenEmailExists() {
-    Lead existingLead = new Lead("123", "existing@example.com", "+777", "Company", "NEW");
+    Lead existingLead = new Lead("123", "Existing",
+            "existing@example.com", "+777", "Company",
+            "NEW", LocalDateTime.now());
     when(mockRepository.findByEmail("existing@example.com"))
           .thenReturn(Optional.of(existingLead));
 
     assertThatThrownBy(() ->
-          service.addLead("existing@example.com", "+888", "Other", "NEW")
+          service.addLead("Existing", "existing@example.com",
+                  "+888", "Other", "NEW")
           ).isInstanceOf(IllegalStateException.class);
 
     verify(mockRepository, never()).save(any(Lead.class));
@@ -62,7 +67,7 @@ public class LeadServiceMockTest {
   void shouldCallFindByEmailBeforeSave() {
     when(mockRepository.findByEmail(anyString())).thenReturn(Optional.empty());
 
-    service.addLead("order@example.com", "+999", "Order Corp", "NEW");
+    service.addLead("OrderUser", "order@example.com", "+999", "Order Corp", "NEW");
 
     InOrder inOrder = inOrder(mockRepository);
     inOrder.verify(mockRepository).findByEmail("order@example.com");

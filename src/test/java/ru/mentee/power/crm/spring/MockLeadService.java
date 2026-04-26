@@ -1,5 +1,6 @@
 package ru.mentee.power.crm.spring;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import ru.mentee.power.crm.model.Lead;
@@ -11,8 +12,10 @@ public class MockLeadService extends LeadService {
   public MockLeadService() {
     super(null);
     this.mockLeads = List.of(
-            new Lead("Test Lead 1", "test1@example.com", "+1234567890", "Test Corp1", "NEW"),
-            new Lead("Test Lead 2", "test2@example.com", "+0987654321", "Test Corp2", "NEW")
+            new Lead("Test Lead 1", "test", "test1@example.com",
+                    "+1234567890", "Test Corp1", "NEW",  LocalDateTime.now()),
+            new Lead("Test Lead 2", "test", "test2@example.com",
+                    "+0987654321", "Test Corp2", "NEW",  LocalDateTime.now())
     );
   }
 

@@ -1,8 +1,11 @@
 package ru.mentee.power.crm.spring.controller;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -27,13 +30,13 @@ public class LeadController {
 
   @GetMapping("/leads/new")
   public String showCreateForm(Model model) {
-    model.addAttribute("lead", new Lead(null, "", "", "", "NEW"));
+    model.addAttribute("lead", new Lead(null,"", "", "", "", "NEW", LocalDateTime.now()));
     return "leads/create";
   }
 
   @PostMapping("/leads")
   public String createLead(@ModelAttribute Lead lead) {
-    leadService.addLead(lead.email(), lead.phone(), lead.company(), lead.status());
+    leadService.addLead(lead.firstName(), lead.email(), lead.phone(), lead.company(), lead.status());
     return "redirect:/leads";
   }
 
@@ -41,14 +44,18 @@ public class LeadController {
   public String showLeads(
           @RequestParam(required = false) String search,
           @RequestParam(required = false) String status,
+          @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime fromDateTime,
+          @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime toDateTime,
           Model model
   ) {
-    List<Lead> leads = leadService.findLeads(search, status);
+    List<Lead> leads = leadService.findLeads(search, status, fromDateTime, toDateTime);
 
     model.addAttribute("leads", leads);
     model.addAttribute("search", search != null ? search : "");
     model.addAttribute("status", status != null ? status: "");
     model.addAttribute("currentFilter", status);
+    model.addAttribute("fromDateTime", fromDateTime);
+    model.addAttribute("toDateTime", toDateTime);
 
     return "leads/list";
   }
@@ -71,7 +78,7 @@ public class LeadController {
 
   @PostMapping("/leads/{id}")
   public String updateLead(@PathVariable String id, @ModelAttribute Lead lead) {
-    Lead updatedLead = new Lead(id, lead.email(), lead.phone(), lead.company(), lead.status());
+    Lead updatedLead = new Lead(id, lead.firstName(), lead.email(), lead.phone(), lead.company(), lead.status(), lead.createdAt());
     leadService.update(id, updatedLead);
     return "redirect:/leads";
   }

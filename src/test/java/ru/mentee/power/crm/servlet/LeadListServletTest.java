@@ -8,6 +8,7 @@ import static org.mockito.Mockito.when;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.lang.reflect.Field;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
@@ -107,8 +108,10 @@ class LeadListServletTest {
   void shouldCallTemplateEngineRender_whenDoGetCalled() throws Exception {
     // Given
     List<Lead> testLeads = List.of(
-            new Lead("1", "test1@example.com", "+111", "Company A", "NEW"),
-            new Lead("2", "test2@example.com", "+222", "Company B", "QUALIFIED")
+            new Lead("1", "test1", "test1@example.com",
+                    "+111", "Company A", "NEW", LocalDateTime.now()),
+            new Lead("2", "test2", "test2@example.com",
+                    "+222", "Company B", "QUALIFIED", LocalDateTime.now())
     );
 
     when(leadService.findAll()).thenReturn(testLeads);

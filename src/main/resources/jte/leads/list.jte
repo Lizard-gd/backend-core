@@ -2,6 +2,8 @@
 @param java.lang.String currentFilter
 @param java.lang.String search
 @param java.lang.String status
+@param java.time.LocalDateTime fromDateTime
+@param java.time.LocalDateTime toDateTime
 
 @template.layout.main(content = @`
     <div class="mb-6 bg-white shadow rounded-lg p-4">
@@ -13,6 +15,19 @@
                 @else
                     <input type="text" name="search" value="" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                 @endif
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Дата с (включительно)</label>
+                <input type="datetime-local" name="fromDateTime"
+                       value="${fromDateTime != null ? fromDateTime.toString().substring(0, 16) : ""}"
+                       class="mt-1 block rounded-md border-gray-300 shadow-sm">
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Дата по (включительно)</label>
+                <input type="datetime-local" name="toDateTime"
+                       value="${toDateTime != null ? toDateTime.toString().substring(0, 16) : ""}"
+                       class="mt-1 block rounded-md border-gray-300 shadow-sm">
             </div>
             <div>
                 <label class="block text-sm font-medium text-gray-700">Статус</label>
@@ -36,6 +51,11 @@
                         <option value="QUALIFIED" selected>QUALIFIED</option>
                     @else
                         <option value="QUALIFIED">QUALIFIED</option>
+                    @endif
+                    @if("LOST".equals(status))
+                        <option value="LOST" selected>LOST</option>
+                    @else
+                        <option value="LOST">LOST</option>
                     @endif
                 </select>
             </div>
@@ -63,6 +83,10 @@
 "bg-blue-600 text-white" : "bg-gray-200 text-gray-700"} hover:bg-blue-500 hover:text-white transition">
                 QUALIFIED
             </a>
+            <a href="/leads?status=LOST" class="px-4 py-2 rounded ${currentFilter == "LOST" ?
+"bg-blue-600 text-white" : "bg-gray-200 text-gray-700"} hover:bg-blue-500 hover:text-white transition">
+                LOST
+            </a>
             <a href="/leads/new"
                class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
                >
@@ -80,23 +104,29 @@
             <table class="min-w-full bg-white border border-gray-200">
                 <thead class="bg-gray-100">
                 <tr>
+                    <th class="px-4 py-2 text-left">Имя</th>
                     <th class="px-4 py-2 text-left">Email</th>
-                    <th class="px-4 py-2 text-left">Phone</th>
-                    <th class="px-4 py-2 text-left">Company</th>
-                    <th class="px-4 py-2 text-left">Status</th>
+                    <th class="px-4 py-2 text-left">Телефон</th>
+                    <th class="px-4 py-2 text-left">Компания</th>
+                    <th class="px-4 py-2 text-left">Статус</th>
+                    <th class="px-4 py-2 text-left">Дата создания</th>
                     <th class="px-4 py-2 text-left">Действия</th>
                 </tr>
                 </thead>
                 <tbody>
                 @for (var lead : leads)
                     <tr class="border-t hover:bg-gray-50">
+                        <td class="px-4 py-2">${lead.firstName()}</td>
                         <td class="px-4 py-2">${lead.email()}</td>
                         <td class="px-4 py-2">${lead.phone()}</td>
                         <td class="px-4 py-2">${lead.company()}</td>
                         <td class="px-4 py-2">
-                            <span class="px-2 py-1 rounded text-sm ${lead.status().equals("NEW") ? "bg-green-100 text-green-800" : lead.status().equals("QUALIFIED") ? "bg-yellow-100 text-yellow-800" : "bg-blue-100 text-blue-800"}">
+                            <span class="px-2 py-1 rounded text-sm ${lead.status().equals("LOST") ? "bg-red-100 text-red-800" : lead.status().equals("NEW") ? "bg-green-100 text-green-800" : lead.status().equals("QUALIFIED") ? "bg-yellow-100 text-yellow-800" : "bg-blue-100 text-blue-800"}">
                                 ${lead.status()}
                             </span>
+                        </td>
+                        <td class="px-4 py-2">
+                            ${lead.createdAt().format(java.time.format.DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm"))}
                         </td>
                         <td class="px-4 py-2">
                             <a href="/leads/${lead.id()}/edit" class="text-blue-600 hover:underline">Редактировать</a>

@@ -1,10 +1,11 @@
 package ru.mentee.power.crm.repository;
 
-import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Repository;
 import ru.mentee.power.crm.model.Lead;
@@ -30,7 +31,8 @@ public class LeadRepository {
   }
 
   public List<Lead> findAll() {
-    return new ArrayList<>(storage.values());
+    return storage.values().stream()
+            .collect(Collectors.toList());
   }
 
   public int size() {

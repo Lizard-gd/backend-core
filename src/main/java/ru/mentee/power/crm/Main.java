@@ -16,12 +16,12 @@ public class Main {
     LeadRepository repository = new LeadRepository();
     LeadService leadService = new LeadService(repository);
 
-    leadService.addLead("john@example.com", "+123456789", "Tech Corp", "NEW");
-    leadService.addLead("jane@example.com", "+987654321", "Design Studio", "QUALIFIED");
-    leadService.addLead("ron@example.com", "+712345678", "Example Corp", "QUALIFIED");
-    leadService.addLead("alex@example.com", "+134567890", "Prompt Studio", "NEW");
-    leadService.addLead("marty@example.com", "+987654321", "Merge Corp", "NEW");
-    leadService.addLead("<script>alert('XSS')</script>", "+999999999", "Hacker Corp", "NEW");
+    leadService.addLead("John", "john@example.com", "+123456789", "Tech Corp", "NEW");
+    leadService.addLead("Jane", "jane@example.com", "+987654321", "Design Studio", "QUALIFIED");
+    leadService.addLead("Ron", "ron@example.com", "+712345678", "Example Corp", "QUALIFIED");
+    leadService.addLead("Alex", "alex@example.com", "+134567890", "Prompt Studio", "NEW");
+    leadService.addLead("Marty", "marty@example.com", "+987654321", "Merge Corp", "NEW");
+    leadService.addLead("Hacker", "<script>alert('XSS')</script>", "+999999999", "Hacker Corp", "NEW");
 
     Context context = tomcat.addContext("", new File(".").getAbsolutePath());
     context.getServletContext().setAttribute("leadService", leadService);

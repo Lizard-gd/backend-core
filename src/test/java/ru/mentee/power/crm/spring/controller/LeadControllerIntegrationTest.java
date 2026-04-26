@@ -26,7 +26,7 @@ class LeadControllerIntegrationTest {
   @BeforeEach
   void setUp() {
     if (leadService.findAll().isEmpty()) {
-      leadService.addLead("john@example.com", "+123456789", "Tech Corp", "NEW");
+      leadService.addLead("John", "john@example.com", "+123456789", "Tech Corp", "NEW");
     }
   }
 

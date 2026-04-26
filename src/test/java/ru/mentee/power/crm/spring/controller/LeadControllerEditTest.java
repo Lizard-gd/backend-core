@@ -13,6 +13,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
@@ -38,7 +39,8 @@ class LeadControllerEditTest {
 
   @Test
   void shouldShowEditFormWithPrefilledData() throws Exception {
-    Lead testLead = new Lead("123", "test@example.com", "+123456789", "Test Corp", "NEW");
+    Lead testLead = new Lead("123", "John", "test@example.com",
+            "+123456789", "Test Corp", "NEW", LocalDateTime.now());
     when(leadService.findById("123")).thenReturn(Optional.of(testLead));
 
     mockMvc.perform(get("/leads/123/edit"))
@@ -51,6 +53,7 @@ class LeadControllerEditTest {
   @Test
   void shouldUpdateLeadAndRedirect() throws Exception {
     mockMvc.perform(post("/leads/123")
+                      .param("firstName", "UpdatedName")
                       .param("email", "updated@example.com")
                       .param("phone", "+222")
                       .param("company", "Updated Corp")

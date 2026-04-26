@@ -14,6 +14,11 @@
     <form method="post" action="/leads/${lead.id()}" class="bg-white p-6 rounded shadow-md">
         <input type="hidden" name="id" value="${lead.id()}">
 
+        <div>
+            <label class="block text-sm font-medium text-gray-700">Имя</label>
+            <input type="text" name="firstName" value="${lead.firstName()}" class="...">
+        </div>
+
         <div class="mb-4">
             <label class="block text-gray-700 font-bold mb-2">Email</label>
             <input type="email" name="email" value="${lead.email()}" class="w-full px-3 py-2 border rounded">
@@ -35,6 +40,7 @@
                 <option value="NEW" selected?="${lead.status().equals("NEW")}">NEW</option>
                 <option value="CONTACTED" selected?="${lead.status().equals("CONTACTED")}">CONTACTED</option>
                 <option value="QUALIFIED" selected?="${lead.status().equals("QUALIFIED")}">QUALIFIED</option>
+                <option value="LOST" selected?="${lead.status().equals("LOST")}">LOST</option>
             </select>
         </div>
 

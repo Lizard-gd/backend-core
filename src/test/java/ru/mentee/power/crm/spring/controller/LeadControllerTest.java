@@ -35,6 +35,7 @@ public class LeadControllerTest {
   @Test
   void shouldCreateLead() throws Exception {
     mockMvc.perform(post("/leads")
+                      .param("firstName", "John")
                       .param("email", "new@example.com")
                       .param("phone", "+123456789")
                       .param("company", "New Corp")
@@ -42,7 +43,7 @@ public class LeadControllerTest {
               .andExpect(status().is3xxRedirection())
               .andExpect(redirectedUrl("/leads"));
 
-    verify(leadService).addLead("new@example.com", "+123456789", "New Corp", "NEW");
+    verify(leadService).addLead("John", "new@example.com", "+123456789", "New Corp", "NEW");
   }
 
   @Test
@@ -54,7 +55,7 @@ public class LeadControllerTest {
               .andExpect(model().attributeExists("leads"))
               .andExpect(model().attribute("currentFilter", "QUALIFIED"));
 
-    verify(leadService).findLeads(null, "QUALIFIED");
+    verify(leadService).findLeads(null, "QUALIFIED", null, null);
   }
 
   @Test
@@ -65,7 +66,7 @@ public class LeadControllerTest {
               .andExpect(view().name("leads/list"))
               .andExpect(model().attribute("currentFilter", nullValue()));
 
-    verify(leadService).findLeads(null, null);
+    verify(leadService).findLeads(null, null, null, null);
   }
 
   @Test
@@ -76,7 +77,7 @@ public class LeadControllerTest {
             .andExpect(status().isOk())
             .andExpect(view().name("leads/list"));
 
-    verify(leadService).findLeads("ivan", "NEW");
+    verify(leadService).findLeads("ivan", "NEW", null, null);
   }
 
   @Test
@@ -85,7 +86,7 @@ public class LeadControllerTest {
                     .param("search", "john"))
             .andExpect(status().isOk());
 
-    verify(leadService).findLeads("john", null);
+    verify(leadService).findLeads("john", null, null, null);
   }
 
   @Test
@@ -93,6 +94,6 @@ public class LeadControllerTest {
     mockMvc.perform(get("/leads"))
             .andExpect(status().isOk());
 
-    verify(leadService).findLeads(null, null);
+    verify(leadService).findLeads(null, null, null, null);
   }
 }

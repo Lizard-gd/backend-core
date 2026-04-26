@@ -1,5 +1,7 @@
 package ru.mentee.power.crm.service;
 
+import java.time.LocalDateTime;
+import java.time.chrono.ChronoLocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -30,14 +32,15 @@ public class LeadService {
     log.info("LeadService @PostConstruct init() called - Bean lifecycle phase");
   }
 
-  public Lead addLead(String email, String phone, String company, String status) {
+  public Lead addLead(String firstName, String email, String phone, String company, String status) {
     Optional<Lead> existing = repository.findByEmail(email);
     if (existing.isPresent()) {
       throw new IllegalStateException("Lead with email already exists: " + email);
     }
 
     String id = UUID.randomUUID().toString();
-    Lead newLead = new Lead(id, email, phone, company, status);
+    LocalDateTime now = LocalDateTime.now();
+    Lead newLead = new Lead(id, firstName, email, phone, company, status, now);
     repository.save(newLead);
 
     return newLead;
@@ -66,8 +69,9 @@ public class LeadService {
     if (existing.isEmpty()) {
       throw new IllegalArgumentException("Lead not found with id: " + id);
     }
-    Lead leadToSave = new Lead(id, updatedLead.email(), updatedLead.phone(),
-            updatedLead.company(), updatedLead.status());
+    LocalDateTime originalCreatedAt = existing.get().createdAt();
+    Lead leadToSave = new Lead(id, updatedLead.firstName(), updatedLead.email(), updatedLead.phone(),
+            updatedLead.company(), updatedLead.status(), originalCreatedAt);
     repository.save(leadToSave);
     return leadToSave;
   }
@@ -79,18 +83,27 @@ public class LeadService {
     } repository.delete(id);
   }
 
-  public List<Lead> findLeads(String search, String status) {
+  public List<Lead> findLeads(String search, String status, LocalDateTime fromDateTime, LocalDateTime toDateTime) {
     List<Lead> allLeads = repository.findAll();
 
-    java.util.stream.Stream<Lead> stream = allLeads.stream();
+    var stream = allLeads.stream();
 
     if (search != null && !search.isBlank()) {
       String lowerSearch = search.toLowerCase();
-      stream = stream.filter(lead -> lead.email().toLowerCase().contains(lowerSearch));
+      stream = stream.filter(lead ->
+              lead.firstName().toLowerCase().contains(lowerSearch) ||
+                      lead.email().toLowerCase().contains(lowerSearch)
+      );
     }
     if (status != null && !status.isBlank()) {
       stream = stream.filter(lead -> lead.status().equals(status));
     }
-    return stream.collect(java.util.stream.Collectors.toList());
+    if (fromDateTime != null) {
+      stream = stream.filter(lead -> !lead.createdAt().isBefore(fromDateTime));
+    }
+    if (toDateTime != null) {
+      stream = stream.filter(lead -> !lead.createdAt().isAfter(toDateTime));
+    }
+    return stream.collect(Collectors.toList());
   }
 }

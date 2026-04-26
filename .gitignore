@@ -39,8 +39,8 @@ bin/
 ### VS Code ###
 .vscode/
 
-### Qwen Code ###
-.qwen/
+### opencode ###
+opencode.yaml
 
 ### Mac OS ###
 .DS_Store
