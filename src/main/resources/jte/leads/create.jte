@@ -6,6 +6,11 @@ content = @`
     <h1 class="text-2xl font-bold mb-6">Добавить нового лида</h1>
 
     <form action="/leads" method="post" class="space-y-4">
+        <!-- FirstName -->
+        <div>
+            <label class="block text-sm font-medium text-gray-700">Имя</label>
+            <input type="text" name="firstName" value="${lead.firstName()}" class="...">
+        </div>
         <!-- Email -->
         <div>
             <label for="email" class="block text-sm font-medium text-gray-700 mb-1">
@@ -62,6 +67,7 @@ content = @`
             <option value="NEW">NEW</option>
             <option value="CONTACTED">CONTACTED</option>
             <option value="QUALIFIED">QUALIFIED</option>
+            <option value="LOST">LOST</option>
             </select>
         </div>
         <!-- Submit Button-->

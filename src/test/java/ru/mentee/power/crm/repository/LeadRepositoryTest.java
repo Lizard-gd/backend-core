@@ -2,6 +2,7 @@ package ru.mentee.power.crm.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -21,7 +22,8 @@ public class LeadRepositoryTest {
   @Test
   void shouldSaveAndFindLeadById_whenLeadSaved() {
 
-    Lead lead = new Lead("1", "ivan@mail.ru", "+71234", "TestCorp", "NEW");
+    Lead lead = new Lead("1", "Ivan",
+            "ivan@mail.ru", "+71234", "TestCorp", "NEW", LocalDateTime.now());
 
     repository.save(lead);
     Optional<Lead> found = repository.findById("1");
@@ -40,9 +42,12 @@ public class LeadRepositoryTest {
 
   @Test
   void shouldReturnAllLeads_whenMultipleLeadsSaved() {
-    Lead lead1 = new Lead("1", "ivan@mail.ru", "+71234", "TestCorp", "NEW");
-    Lead lead2 = new Lead("2", "pavel@mail.ru", "+75678", "TestCorp", "NEW");
-    Lead lead3 = new Lead("3", "marina@mail.ru", "+74321", "TestCorp", "NEW");
+    Lead lead1 = new Lead("1", "Ivan",
+            "ivan@mail.ru", "+71234", "TestCorp", "NEW", LocalDateTime.now());
+    Lead lead2 = new Lead("2", "pavel",
+            "pavel@mail.ru", "+75678", "TestCorp", "NEW", LocalDateTime.now());
+    Lead lead3 = new Lead("3", "marina",
+            "marina@mail.ru", "+74321", "TestCorp", "NEW", LocalDateTime.now());
 
     repository.save(lead1);
     repository.save(lead2);
@@ -55,7 +60,8 @@ public class LeadRepositoryTest {
 
   @Test
   void shouldDeleteLead_whenLeadExists() {
-    Lead lead1 = new Lead("1", "ivan@mail.ru", "+71234", "TestCorp", "NEW");
+    Lead lead1 = new Lead("1", "Ivan", "ivan@mail.ru",
+            "+71234", "TestCorp", "NEW", LocalDateTime.now());
     repository.save(lead1);
 
     repository.delete("1");
@@ -66,8 +72,10 @@ public class LeadRepositoryTest {
 
   @Test
   void shouldOverwriteLead_whenSaveWithSameId() {
-    Lead lead1 = new Lead("1", "ivan@mail.ru", "+71234", "TestCorp", "NEW");
-    Lead lead2 = new Lead("1", "pavel@mail.ru", "+75678", "TestCorp", "NEW");
+    Lead lead1 = new Lead("1", "Ivan", "ivan@mail.ru",
+            "+71234", "TestCorp", "NEW", LocalDateTime.now());
+    Lead lead2 = new Lead("1", "pavel", "pavel@mail.ru",
+            "+75678", "TestCorp", "NEW", LocalDateTime.now());
 
     repository.save(lead1);
     repository.save(lead2);
@@ -82,7 +90,8 @@ public class LeadRepositoryTest {
 
     for (int i = 0; i < 1000; i++) {
       String id = String.valueOf(i);
-      Lead lead = new Lead(id, "email" + i + "@test.com", "+7" + i, "Company" + i, "NEW");
+      Lead lead = new Lead(id, "Ivan" + i, "email" + i + "@test.com",
+              "+7" + i, "Company" + i, "NEW", LocalDateTime.now());
       repository.save(lead);
       leadList.add(lead);
     }
@@ -110,8 +119,10 @@ public class LeadRepositoryTest {
 
   @Test
   void shouldSaveBothLeads_evenWithSameEmailAndPhone_becauseRepositoryDoesNotCheckBusinessRules() {
-    Lead originalLead = new Lead("1", "ivan@mail.ru", "+79001234567", "Acme Corp", "NEW");
-    Lead duplicateLead = new Lead("2", "ivan@mail.ru", "+79001234567", "TechCorp", "HOT");
+    Lead originalLead = new Lead("1", "Ivan", "ivan@mail.ru",
+            "+79001234567", "Acme Corp", "NEW", LocalDateTime.now());
+    Lead duplicateLead = new Lead("2", "Ivan", "ivan@mail.ru",
+            "+79001234567", "TechCorp", "HOT", LocalDateTime.now());
 
     repository.save(originalLead);
     repository.save(duplicateLead);

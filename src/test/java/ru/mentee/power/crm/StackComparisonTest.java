@@ -142,9 +142,9 @@ public class StackComparisonTest {
     LeadService leadService = new LeadService(repository);
 
     // Добавляем тестовые данные
-    leadService.addLead("test1@example.com", "+111111111", "Company 1", "NEW");
-    leadService.addLead("test2@example.com", "+222222222", "Company 2", "QUALIFIED");
-    leadService.addLead("test3@example.com", "+333333333", "Company 3", "NEW");
+    leadService.addLead("test1", "test1@example.com", "+111111111", "Company 1", "NEW");
+    leadService.addLead("test2", "test2@example.com", "+222222222", "Company 2", "QUALIFIED");
+    leadService.addLead("test3", "test3@example.com", "+333333333", "Company 3", "NEW");
 
     Context context = servletTomcat.addContext("", new File(".").getAbsolutePath());
     context.getServletContext().setAttribute("leadService", leadService);

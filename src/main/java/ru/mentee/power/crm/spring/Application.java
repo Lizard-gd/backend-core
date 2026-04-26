@@ -18,17 +18,17 @@ public class Application {
     LeadService leadService = context.getBean(LeadService.class);
 
     if (leadService.findAll().isEmpty()) {
-      leadService.addLead("john@example.com", "+123456789", "Tech Corp", "NEW");
-      leadService.addLead("jane@example.com", "+987654321", "Design Studio", "CONTACTED");
-      leadService.addLead("ron@example.com", "+712345678", "Example Corp", "CONTACTED");
-      leadService.addLead("alex@example.com", "+134567890", "Prompt Studio", "NEW");
-      leadService.addLead("marty@example.com", "+987654321", "Merge Corp", "CONTACTED");
-      leadService.addLead("<script>alert('XSS')</script>", "+999999999", "Hacker Corp", "NEW");
-      leadService.addLead("carl@example.com", "+204738503", "Test Corp", "CONTACTED");
-      leadService.addLead("paul@example.com", "+204759321", "Paul Studio", "QUALIFIED");
-      leadService.addLead("carol@example.com", "+345063218", "Form Corp", "QUALIFIED");
-      leadService.addLead("ralf@example.com", "+098764987", "Nero Studio", "CONTACTED");
-
+      leadService.addLead("John", "john@example.com", "+123456789", "Tech Corp", "NEW");
+      leadService.addLead("Jane", "jane@example.com", "+987654321", "Design Studio", "CONTACTED");
+      leadService.addLead("Ron", "ron@example.com", "+712345678", "Example Corp", "CONTACTED");
+      leadService.addLead("Alex", "alex@example.com", "+134567890", "Prompt Studio", "NEW");
+      leadService.addLead("Marty", "marty@example.com", "+987654321", "Merge Corp", "CONTACTED");
+      leadService.addLead("Hacker", "<script>alert('XSS')</script>", "+999999999", "Hacker Corp", "NEW");
+      leadService.addLead("Carl", "carl@example.com", "+204738503", "Test Corp", "CONTACTED");
+      leadService.addLead("Paul", "paul@example.com", "+204759321", "Paul Studio", "QUALIFIED");
+      leadService.addLead("Carol", "carol@example.com", "+345063218", "Form Corp", "QUALIFIED");
+      leadService.addLead("Ralf", "ralf@example.com", "+098764987", "Nero Studio", "CONTACTED");
+      leadService.addLead("Lost", "lost@example.com", "+000000000", "Lost Corp", "LOST");
     }
   }
 }
