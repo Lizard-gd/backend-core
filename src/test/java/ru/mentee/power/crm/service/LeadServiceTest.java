@@ -299,7 +299,10 @@ class LeadServiceTest {
   @DisplayName("findLeads фильтрует по toDateTime (дата создания не позже)")
   void findLeads_FiltersByToDateTime() {
     Lead early = service.addLead("Early", "early@test.com", "+1", "E", "NEW");
-    try { Thread.sleep(100); } catch (InterruptedException ignored) {}
+    try {
+      Thread.sleep(100); } catch (InterruptedException ignored) {
+
+    }
     Lead late = service.addLead("Late", "late@test.com", "+2", "L", "NEW");
 
     // to = момент создания раннего лида (включаем только раннего)

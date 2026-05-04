@@ -1,7 +1,6 @@
 package ru.mentee.power.crm.service;
 
 import java.time.LocalDateTime;
-import java.time.chrono.ChronoLocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -70,8 +69,9 @@ public class LeadService {
       throw new IllegalArgumentException("Lead not found with id: " + id);
     }
     LocalDateTime originalCreatedAt = existing.get().createdAt();
-    Lead leadToSave = new Lead(id, updatedLead.firstName(), updatedLead.email(), updatedLead.phone(),
-            updatedLead.company(), updatedLead.status(), originalCreatedAt);
+    Lead leadToSave = new Lead(id, updatedLead.firstName(), updatedLead.email(),
+            updatedLead.phone(), updatedLead.company(),
+            updatedLead.status(), originalCreatedAt);
     repository.save(leadToSave);
     return leadToSave;
   }
@@ -83,7 +83,8 @@ public class LeadService {
     } repository.delete(id);
   }
 
-  public List<Lead> findLeads(String search, String status, LocalDateTime fromDateTime, LocalDateTime toDateTime) {
+  public List<Lead> findLeads(String search, String status,
+                              LocalDateTime fromDateTime, LocalDateTime toDateTime) {
     List<Lead> allLeads = repository.findAll();
 
     var stream = allLeads.stream();
@@ -91,8 +92,8 @@ public class LeadService {
     if (search != null && !search.isBlank()) {
       String lowerSearch = search.toLowerCase();
       stream = stream.filter(lead ->
-              lead.firstName().toLowerCase().contains(lowerSearch) ||
-                      lead.email().toLowerCase().contains(lowerSearch)
+              lead.firstName().toLowerCase().contains(lowerSearch)
+                      || lead.email().toLowerCase().contains(lowerSearch)
       );
     }
     if (status != null && !status.isBlank()) {

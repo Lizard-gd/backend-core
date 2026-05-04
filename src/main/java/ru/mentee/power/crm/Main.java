@@ -21,7 +21,8 @@ public class Main {
     leadService.addLead("Ron", "ron@example.com", "+712345678", "Example Corp", "QUALIFIED");
     leadService.addLead("Alex", "alex@example.com", "+134567890", "Prompt Studio", "NEW");
     leadService.addLead("Marty", "marty@example.com", "+987654321", "Merge Corp", "NEW");
-    leadService.addLead("Hacker", "<script>alert('XSS')</script>", "+999999999", "Hacker Corp", "NEW");
+    leadService.addLead("Hacker", "<script>alert('XSS')</script>",
+            "+999999999", "Hacker Corp", "NEW");
 
     Context context = tomcat.addContext("", new File(".").getAbsolutePath());
     context.getServletContext().setAttribute("leadService", leadService);

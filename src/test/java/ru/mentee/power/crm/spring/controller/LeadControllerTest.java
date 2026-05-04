@@ -96,4 +96,96 @@ public class LeadControllerTest {
 
     verify(leadService).findLeads(null, null, null, null);
   }
+
+  @Test
+  void shouldReturnCreateFormWithError_whenFirstNameIsBlank() throws Exception {
+    mockMvc.perform(post("/leads")
+                    .param("firstName", "")
+                    .param("email", "john@example.com")
+                    .param("phone", "+123456789")
+                    .param("company", "Test Corp")
+                    .param("status", "NEW"))
+            .andExpect(status().isOk())
+            .andExpect(view().name("leads/create"))
+            .andExpect(model().attributeHasFieldErrors("lead", "firstName"))
+            .andExpect(model().attributeHasFieldErrorCode("lead", "firstName", "NotBlank"));
+  }
+
+  @Test
+  void shouldReturnCreateFormWithError_whenEmailIsInvalid() throws Exception {
+    mockMvc.perform(post("/leads")
+                    .param("firstName", "John")
+                    .param("email", "invalid-email")
+                    .param("phone", "+123456789")
+                    .param("company", "Test Corp")
+                    .param("status", "NEW"))
+            .andExpect(status().isOk())
+            .andExpect(view().name("leads/create"))
+            .andExpect(model().attributeHasFieldErrors("lead", "email"));
+  }
+
+  @Test
+  void shouldReturnCreateFormWithError_whenEmailMissingDomain() throws Exception {
+    mockMvc.perform(post("/leads")
+                    .param("firstName", "John")
+                    .param("email", "user@domain")
+                    .param("phone", "+123456789")
+                    .param("company", "Test Corp")
+                    .param("status", "NEW"))
+            .andExpect(status().isOk())
+            .andExpect(view().name("leads/create"))
+            .andExpect(model().attributeHasFieldErrors("lead", "email"));
+  }
+
+  @Test
+  void shouldReturnCreateFormWithError_whenPhoneHasNoPlus() throws Exception {
+    mockMvc.perform(post("/leads")
+                    .param("firstName", "John")
+                    .param("email", "john@example.com")
+                    .param("phone", "123456789")
+                    .param("company", "Test Corp")
+                    .param("status", "NEW"))
+            .andExpect(status().isOk())
+            .andExpect(view().name("leads/create"))
+            .andExpect(model().attributeHasFieldErrors("lead", "phone"));
+  }
+
+  @Test
+  void shouldRedirectAfterCreate_whenAllFieldsValid() throws Exception {
+    mockMvc.perform(post("/leads")
+                    .param("firstName", "John")
+                    .param("email", "john@example.com")
+                    .param("phone", "+123456789")
+                    .param("company", "Test Corp")
+                    .param("status", "NEW"))
+            .andExpect(status().is3xxRedirection())
+            .andExpect(redirectedUrl("/leads"));
+  }
+
+  @Test
+  void shouldReturnEditFormWithError_whenFirstNameBlankOnUpdate() throws Exception {
+    String leadId = "some-id";
+    mockMvc.perform(post("/leads/{id}", leadId)
+                    .param("firstName", "")
+                    .param("email", "john@example.com")
+                    .param("phone", "+123456789")
+                    .param("company", "Test Corp")
+                    .param("status", "NEW"))
+            .andExpect(status().isOk())
+            .andExpect(view().name("spring/edit"))
+            .andExpect(model().attributeHasFieldErrors("lead", "firstName"));
+  }
+
+  @Test
+  void shouldRedirectAfterUpdate_whenAllFieldsValid() throws Exception {
+    String leadId = "some-id";
+    mockMvc.perform(post("/leads/{id}", leadId)
+                    .param("firstName", "John")
+                    .param("email", "john@example.com")
+                    .param("phone", "+123456789")
+                    .param("company", "Test Corp")
+                    .param("status", "NEW"))
+            .andExpect(status().is3xxRedirection())
+            .andExpect(redirectedUrl("/leads"));
+  }
 }

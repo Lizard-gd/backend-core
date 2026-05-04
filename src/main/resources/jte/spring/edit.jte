@@ -1,5 +1,6 @@
 @import ru.mentee.power.crm.model.Lead
 @param Lead lead
+@param org.springframework.validation.BindingResult errors = null
 
 <!DOCTYPE html>
 <html lang="en">
@@ -16,32 +17,56 @@
 
         <div>
             <label class="block text-sm font-medium text-gray-700">Имя</label>
-            <input type="text" name="firstName" value="${lead.firstName()}" class="...">
+            <input type="text" name="firstName" value="${lead.firstName()}"
+                   class="w-full px-3 py-2 border rounded ${errors != null
+&& errors.hasFieldErrors("firstName") ? "border-red-500" : "border-gray-300"}">
+            @if(errors != null && errors.hasFieldErrors("firstName"))
+                <p class="text-red-600 text-sm mt-1">${errors.getFieldError("firstName").getDefaultMessage()}</p>
+            @endif
         </div>
 
         <div class="mb-4">
             <label class="block text-gray-700 font-bold mb-2">Email</label>
-            <input type="email" name="email" value="${lead.email()}" class="w-full px-3 py-2 border rounded">
+            <input type="email" name="email" value="${lead.email()}"
+                   class="w-full px-3 py-2 border rounded ${errors != null
+&& errors.hasFieldErrors("email") ? "border-red-500" : "border-gray-300"}">
+            @if(errors != null && errors.hasFieldErrors("email"))
+                <p class="text-red-600 text-sm mt-1">${errors.getFieldError("email").getDefaultMessage()}</p>
+            @endif
         </div>
 
         <div class="mb-4">
             <label class="block text-gray-700 font-bold mb-2">Телефон</label>
-            <input type="tel" name="phone" value="${lead.phone()}" class="w-full px-3 py-2 border rounded">
+            <input type="tel" name="phone" value="${lead.phone()}"
+                   class="w-full px-3 py-2 border rounded ${errors != null
+&& errors.hasFieldErrors("phone") ? "border-red-500" : "border-gray-300"}">
+            @if(errors != null && errors.hasFieldErrors("phone"))
+                <p class="text-red-600 text-sm mt-1">${errors.getFieldError("phone").getDefaultMessage()}</p>
+            @endif
         </div>
 
         <div class="mb-4">
             <label class="block text-gray-700 font-bold mb-2">Компания</label>
-            <input type="text" name="company" value="${lead.company()}" class="w-full px-3 py-2 border rounded">
+            <input type="text" name="company" value="${lead.company()}"
+                   class="w-full px-3 py-2 border rounded ${errors != null
+&& errors.hasFieldErrors("company") ? "border-red-500" : "border-gray-300"}">
+            @if(errors != null && errors.hasFieldErrors("company"))
+                <p class="text-red-600 text-sm mt-1">${errors.getFieldError("company").getDefaultMessage()}</p>
+            @endif
         </div>
 
         <div class="mb-4">
             <label class="block text-gray-700 font-bold mb-2">Статус</label>
-            <select name="status" class="w-full px-3 py-2 border rounded">
+            <select name="status" class="w-full px-3 py-2 border rounded ${errors != null
+&& errors.hasFieldErrors("status") ? "border-red-500" : "border-gray-300"}">
                 <option value="NEW" selected?="${lead.status().equals("NEW")}">NEW</option>
                 <option value="CONTACTED" selected?="${lead.status().equals("CONTACTED")}">CONTACTED</option>
                 <option value="QUALIFIED" selected?="${lead.status().equals("QUALIFIED")}">QUALIFIED</option>
                 <option value="LOST" selected?="${lead.status().equals("LOST")}">LOST</option>
             </select>
+            @if(errors != null && errors.hasFieldErrors("status"))
+                <p class="text-red-600 text-sm mt-1">${errors.getFieldError("status").getDefaultMessage()}</p>
+            @endif
         </div>
 
         <div class="flex gap-2">
