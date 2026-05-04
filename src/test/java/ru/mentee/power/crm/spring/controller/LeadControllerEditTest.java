@@ -55,7 +55,7 @@ class LeadControllerEditTest {
     mockMvc.perform(post("/leads/123")
                       .param("firstName", "UpdatedName")
                       .param("email", "updated@example.com")
-                      .param("phone", "+222")
+                      .param("phone", "+222222")
                       .param("company", "Updated Corp")
                       .param("status", "QUALIFIED")
                       .param("id", "123"))

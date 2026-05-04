@@ -1,14 +1,15 @@
 package ru.mentee.power.crm.spring.controller;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
+import jakarta.validation.Valid;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -30,13 +31,27 @@ public class LeadController {
 
   @GetMapping("/leads/new")
   public String showCreateForm(Model model) {
-    model.addAttribute("lead", new Lead(null,"", "", "", "", "NEW", LocalDateTime.now()));
+    model.addAttribute("lead", new Lead(null, "", "", "", "", "NEW", LocalDateTime.now()));
     return "leads/create";
   }
 
   @PostMapping("/leads")
-  public String createLead(@ModelAttribute Lead lead) {
-    leadService.addLead(lead.firstName(), lead.email(), lead.phone(), lead.company(), lead.status());
+  public String createLead(@Valid @ModelAttribute("lead") Lead lead,
+                           BindingResult result, Model model) {
+    if (result.hasErrors()) {
+      model.addAttribute("lead", lead);
+      model.addAttribute("errors", result);
+      return "leads/create";
+    }
+    try {
+      leadService.addLead(lead.firstName(), lead.email(),
+              lead.phone(), lead.company(), lead.status());
+    } catch (IllegalStateException e) {
+      result.rejectValue("email", "error.duplicate", "Лид с таким email уже существует");
+      model.addAttribute("lead", lead);
+      model.addAttribute("errors", result);
+      return "leads/create";
+    }
     return "redirect:/leads";
   }
 
@@ -44,15 +59,17 @@ public class LeadController {
   public String showLeads(
           @RequestParam(required = false) String search,
           @RequestParam(required = false) String status,
-          @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime fromDateTime,
-          @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime toDateTime,
+          @RequestParam(required = false) @DateTimeFormat(iso
+                  = DateTimeFormat.ISO.DATE_TIME) LocalDateTime fromDateTime,
+          @RequestParam(required = false) @DateTimeFormat(iso
+                  = DateTimeFormat.ISO.DATE_TIME) LocalDateTime toDateTime,
           Model model
   ) {
     List<Lead> leads = leadService.findLeads(search, status, fromDateTime, toDateTime);
 
     model.addAttribute("leads", leads);
     model.addAttribute("search", search != null ? search : "");
-    model.addAttribute("status", status != null ? status: "");
+    model.addAttribute("status", status != null ? status : "");
     model.addAttribute("currentFilter", status);
     model.addAttribute("fromDateTime", fromDateTime);
     model.addAttribute("toDateTime", toDateTime);
@@ -77,9 +94,14 @@ public class LeadController {
   }
 
   @PostMapping("/leads/{id}")
-  public String updateLead(@PathVariable String id, @ModelAttribute Lead lead) {
-    Lead updatedLead = new Lead(id, lead.firstName(), lead.email(), lead.phone(), lead.company(), lead.status(), lead.createdAt());
-    leadService.update(id, updatedLead);
+  public String updateLead(@PathVariable String id, @Valid @ModelAttribute("lead") Lead lead,
+                           BindingResult result, Model model) {
+    if (result.hasErrors()) {
+      model.addAttribute("lead", lead);
+      model.addAttribute("errors", result);
+      return "spring/edit";
+    }
+    leadService.update(id, lead);
     return "redirect:/leads";
   }
 

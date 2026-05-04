@@ -23,7 +23,8 @@ public class Application {
       leadService.addLead("Ron", "ron@example.com", "+712345678", "Example Corp", "CONTACTED");
       leadService.addLead("Alex", "alex@example.com", "+134567890", "Prompt Studio", "NEW");
       leadService.addLead("Marty", "marty@example.com", "+987654321", "Merge Corp", "CONTACTED");
-      leadService.addLead("Hacker", "<script>alert('XSS')</script>", "+999999999", "Hacker Corp", "NEW");
+      leadService.addLead("Hacker", "<script>alert('XSS')</script>",
+              "+999999999", "Hacker Corp", "NEW");
       leadService.addLead("Carl", "carl@example.com", "+204738503", "Test Corp", "CONTACTED");
       leadService.addLead("Paul", "paul@example.com", "+204759321", "Paul Studio", "QUALIFIED");
       leadService.addLead("Carol", "carol@example.com", "+345063218", "Form Corp", "QUALIFIED");

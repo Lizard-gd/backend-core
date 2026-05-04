@@ -58,6 +58,9 @@ ext {
     implementation "gg.jte:jte-spring-boot-starter-3:${jteVersion}"
 
     testImplementation 'org.springframework.boot:spring-boot-starter-webmvc-test'
+
+    //Для Bean Validation аннотаций
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
 }
 
 checkstyle {
