@@ -92,13 +92,19 @@
                >
                 + Добавить лида
             </a>
+
         </div>
 
         @if(currentFilter != null)
             <p class="text-sm text-gray-600 mb-4">Показаны лиды со статусом: <span class="font-semibold">${currentFilter}</span></p>
         @endif
 
-        <h2 class="text-2xl font-bold mb-4">Lead List</h2>
+        <div class="flex justify-between items-center mb-4">
+            <h2 class="text-2xl font-bold">Lead List</h2>
+            <a href="/deals" class="bg-indigo-500 text-white px-4 py-2 rounded hover:bg-indigo-600">
+                Список сделок
+            </a>
+        </div>
 
         <div class="overflow-x-auto">
             <table class="min-w-full bg-white border border-gray-200">
@@ -130,6 +136,12 @@
                         </td>
                         <td class="px-4 py-2">
                             <a href="/leads/${lead.id()}/edit" class="text-blue-600 hover:underline">Редактировать</a>
+                            @if(lead.status().equals("QUALIFIED"))
+                                <a href="/deals/convert/${lead.id()}"
+                                   class="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600 text-sm ml-2">
+                                    → Сделка
+                                </a>
+                            @endif
                             <form method="post" action="/leads/${lead.id()}/delete" class="inline ml-2"
                                   onclick="return confirm('Удалить лида ${lead.email()}?')">
                                 <button type="submit" class="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700">Удалить</button>
