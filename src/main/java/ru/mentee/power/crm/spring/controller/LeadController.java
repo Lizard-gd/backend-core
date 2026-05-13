@@ -3,6 +3,7 @@ package ru.mentee.power.crm.spring.controller;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import jakarta.validation.Valid;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -31,7 +32,10 @@ public class LeadController {
 
   @GetMapping("/leads/new")
   public String showCreateForm(Model model) {
-    model.addAttribute("lead", new Lead(null, "", "", "", "", "NEW", LocalDateTime.now()));
+    Lead emptyLead = new Lead();
+    emptyLead.setStatus("NEW");
+    emptyLead.setCreatedAt(LocalDateTime.now());
+    model.addAttribute("lead", emptyLead);
     return "leads/create";
   }
 
@@ -44,8 +48,8 @@ public class LeadController {
       return "leads/create";
     }
     try {
-      leadService.addLead(lead.firstName(), lead.email(),
-              lead.phone(), lead.company(), lead.status());
+      leadService.addLead(lead.getFirstName(), lead.getEmail(),
+              lead.getPhone(), lead.getCompany(), lead.getStatus());
     } catch (IllegalStateException e) {
       result.rejectValue("email", "error.duplicate", "Лид с таким email уже существует");
       model.addAttribute("lead", lead);
@@ -85,7 +89,8 @@ public class LeadController {
 
   @GetMapping("/leads/{id}/edit")
   public String showEditForm(@PathVariable String id, Model model) {
-    Optional<Lead> leadOpt = leadService.findById(id);
+    UUID uuid = UUID.fromString(id);
+    Optional<Lead> leadOpt = leadService.findById(uuid);
     if (leadOpt.isEmpty()) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Lead not found with id: " + id);
     }
@@ -101,13 +106,15 @@ public class LeadController {
       model.addAttribute("errors", result);
       return "spring/edit";
     }
-    leadService.update(id, lead);
+    UUID uuid = UUID.fromString(id);
+    leadService.update(uuid, lead);
     return "redirect:/leads";
   }
 
   @PostMapping("/leads/{id}/delete")
   public String delete(@PathVariable String id) {
-    leadService.delete(id);
+    UUID uuid = UUID.fromString(id);
+    leadService.delete(uuid);
     return "redirect:/leads";
   }
 }

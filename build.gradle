@@ -64,6 +64,9 @@ ext {
 
     // JPA + Hibernate
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    testImplementation 'org.springframework.boot:spring-boot-starter-data-jpa-test'
+    testImplementation 'org.springframework.boot:spring-boot-resttestclient'
+    testImplementation 'org.springframework.boot:spring-boot-starter-webmvc-test'
     // PostgreSQL driver
     runtimeOnly 'org.postgresql:postgresql'
     // H2 для тестов
@@ -142,7 +145,7 @@ tasks.register('runServlet', JavaExec) {
 tasks.register('runSpring', JavaExec) {
     group = 'application'
     description = 'Run Spring stack (Application.java) on port 8081'
-    mainClass = 'ru.mentee.power.crm.spring.Application'
+    mainClass = 'ru.mentee.power.crm.Application'
     classpath = sourceSets.main.runtimeClasspath
     systemProperty 'server.port', '8081'
     systemProperty 'spring.profiles.active', 'dev'

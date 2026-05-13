@@ -3,130 +3,94 @@ package ru.mentee.power.crm.repository;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
+import org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabase;
 import ru.mentee.power.crm.model.Lead;
 
-public class LeadRepositoryTest {
+@DataJpaTest
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
+class LeadRepositoryTest {
+
+  @Autowired
   private LeadRepository repository;
 
-  @BeforeEach
-  void setUp() {
-    repository = new LeadRepository();
+  private Lead createTestLead(String email, String status) {
+    Lead lead = new Lead();
+    lead.setFirstName("TestName");
+    lead.setEmail(email);
+    lead.setPhone("+71234567890");
+    lead.setCompany("TestCompany");
+    lead.setStatus(status);
+    lead.setCreatedAt(LocalDateTime.now());
+    // ID не задаём – пусть Hibernate сгенерирует
+    return lead;
   }
 
   @Test
-  void shouldSaveAndFindLeadById_whenLeadSaved() {
+  void shouldSaveAndFindLeadById_whenValidData() {
+    Lead lead = createTestLead("save@example.com", "NEW");
 
-    Lead lead = new Lead("1", "Ivan",
-            "ivan@mail.ru", "+71234", "TestCorp", "NEW", LocalDateTime.now());
-
-    repository.save(lead);
-    Optional<Lead> found = repository.findById("1");
+    Lead saved = repository.save(lead);
+    Optional<Lead> found = repository.findById(saved.getId());
 
     assertThat(found).isPresent();
-    assertThat(found.get().email()).isEqualTo("ivan@mail.ru");
+    assertThat(found.get().getEmail()).isEqualTo("save@example.com");
+    assertThat(found.get().getStatus()).isEqualTo("NEW");
   }
 
   @Test
-  void shouldReturnNull_whenLeadNotFound() {
+  void shouldFindByEmailNative_whenLeadExists() {
+    Lead lead = createTestLead("native@test.com", "QUALIFIED");
+    repository.save(lead);
 
-    Optional<Lead> found = repository.findById("unknown-id");
+    Optional<Lead> found = repository.findByEmailNative("native@test.com");
 
+    assertThat(found).isPresent();
+    assertThat(found.get().getCompany()).isEqualTo("TestCompany");
+  }
+
+  @Test
+  void shouldReturnEmptyOptional_whenEmailNotFound() {
+    Optional<Lead> found = repository.findByEmailNative("notexist@example.com");
     assertThat(found).isEmpty();
   }
 
   @Test
-  void shouldReturnAllLeads_whenMultipleLeadsSaved() {
-    Lead lead1 = new Lead("1", "Ivan",
-            "ivan@mail.ru", "+71234", "TestCorp", "NEW", LocalDateTime.now());
-    Lead lead2 = new Lead("2", "pavel",
-            "pavel@mail.ru", "+75678", "TestCorp", "NEW", LocalDateTime.now());
-    Lead lead3 = new Lead("3", "marina",
-            "marina@mail.ru", "+74321", "TestCorp", "NEW", LocalDateTime.now());
+  void shouldFindByStatusNative_whenLeadExists() {
+    Lead lead = createTestLead("status@test.com", "CONTACTED");
+    repository.save(lead);
 
-    repository.save(lead1);
-    repository.save(lead2);
-    repository.save(lead3);
+    List<Lead> found = repository.findByStatusNative("CONTACTED");
 
-    List<Lead> leads = repository.findAll();
-
-    assertThat(leads).hasSize(3);
+    assertThat(found).hasSize(1);
+    assertThat(found.get(0).getEmail()).isEqualTo("status@test.com");
   }
 
   @Test
-  void shouldDeleteLead_whenLeadExists() {
-    Lead lead1 = new Lead("1", "Ivan", "ivan@mail.ru",
-            "+71234", "TestCorp", "NEW", LocalDateTime.now());
-    repository.save(lead1);
+  void shouldFindAllLeads_whenMultipleSaved() {
+    repository.save(createTestLead("all1@test.com", "NEW"));
+    repository.save(createTestLead("all2@test.com", "QUALIFIED"));
 
-    repository.delete("1");
+    List<Lead> all = repository.findAll();
 
-    assertThat(repository.findById("1")).isEmpty();
-    assertThat(repository.size()).isEqualTo(0);
+    assertThat(all).hasSize(2);
   }
 
   @Test
-  void shouldOverwriteLead_whenSaveWithSameId() {
-    Lead lead1 = new Lead("1", "Ivan", "ivan@mail.ru",
-            "+71234", "TestCorp", "NEW", LocalDateTime.now());
-    Lead lead2 = new Lead("1", "pavel", "pavel@mail.ru",
-            "+75678", "TestCorp", "NEW", LocalDateTime.now());
+  void shouldDeleteLeadById_whenLeadExists() {
+    Lead lead = createTestLead("delete@test.com", "NEW");
+    Lead saved = repository.save(lead);
+    UUID id = saved.getId();
 
-    repository.save(lead1);
-    repository.save(lead2);
+    repository.deleteById(id);
+    Optional<Lead> found = repository.findById(id);
 
-    assertThat(repository.size()).isEqualTo(1);
-    assertThat(repository.findById("1").get().email()).isEqualTo("pavel@mail.ru");
-  }
-
-  @Test
-  void shouldFindFasterWithMap_thanWithListFilter() {
-    List<Lead> leadList = new ArrayList<>();
-
-    for (int i = 0; i < 1000; i++) {
-      String id = String.valueOf(i);
-      Lead lead = new Lead(id, "Ivan" + i, "email" + i + "@test.com",
-              "+7" + i, "Company" + i, "NEW", LocalDateTime.now());
-      repository.save(lead);
-      leadList.add(lead);
-    }
-    String targetId = "500";
-
-    long mapStart = System.nanoTime();
-    Optional<Lead> foundInMap = repository.findById(targetId);
-    long mapDuration = System.nanoTime() - mapStart;
-
-    long listStart = System.nanoTime();
-    Lead foundInList = leadList.stream()
-            .filter(lead -> lead.id().equals(targetId))
-            .findFirst()
-            .orElse(null);
-    long listDuration = System.nanoTime() - listStart;
-
-    assertThat(foundInMap.get()).isEqualTo(foundInList);
-
-    assertThat(listDuration).isGreaterThan(mapDuration * 10);
-
-    System.out.println("Map поиск: " + mapDuration + " ns");
-    System.out.println("List поиск: " + listDuration + " ns");
-    System.out.println("Ускорение: " + (listDuration / mapDuration) + "x");
-  }
-
-  @Test
-  void shouldSaveBothLeads_evenWithSameEmailAndPhone_becauseRepositoryDoesNotCheckBusinessRules() {
-    Lead originalLead = new Lead("1", "Ivan", "ivan@mail.ru",
-            "+79001234567", "Acme Corp", "NEW", LocalDateTime.now());
-    Lead duplicateLead = new Lead("2", "Ivan", "ivan@mail.ru",
-            "+79001234567", "TechCorp", "HOT", LocalDateTime.now());
-
-    repository.save(originalLead);
-    repository.save(duplicateLead);
-
-    assertThat(repository.size()).isEqualTo(2);
+    assertThat(found).isEmpty();
   }
 }

@@ -10,6 +10,7 @@ import static org.mockito.Mockito.when;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Optional;
+import java.util.UUID;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -40,17 +41,25 @@ class DealServiceTest {
 
   @Test
   void convertLeadToDeal_shouldCreateDeal_whenLeadExistsAndQualified() {
-    String leadId = "lead-123";
-    Lead qualifiedLead = new Lead(leadId, "John", "john@example.com",
-              "+123456789", "TechCorp", "QUALIFIED", LocalDateTime.now());
+    String leadIdStr = UUID.randomUUID().toString();
+    UUID leadUuid = UUID.fromString(leadIdStr);
+    Lead qualifiedLead = new Lead();
+    qualifiedLead.setId(leadUuid);
+    qualifiedLead.setFirstName("John");
+    qualifiedLead.setEmail("john@example.com");
+    qualifiedLead.setPhone("+123456789");
+    qualifiedLead.setCompany("TechCorp");
+    qualifiedLead.setStatus("QUALIFIED");
+    qualifiedLead.setCreatedAt(LocalDateTime.now());
+
     BigDecimal amount = new BigDecimal("100000");
 
-    when(leadRepository.findById(leadId)).thenReturn(Optional.of(qualifiedLead));
+    when(leadRepository.findById(leadUuid)).thenReturn(Optional.of(qualifiedLead));
 
-    Deal createdDeal = dealService.convertLeadToDeal(leadId, amount);
+    Deal createdDeal = dealService.convertLeadToDeal(leadIdStr, amount);
 
     assertThat(createdDeal).isNotNull();
-    assertThat(createdDeal.getLeadId()).isEqualTo(leadId);
+    assertThat(createdDeal.getLeadId()).isEqualTo(leadIdStr);
     assertThat(createdDeal.getAmount()).isEqualTo(amount);
     assertThat(createdDeal.getStatus()).isEqualTo(DealStatus.NEW);
 
@@ -59,26 +68,29 @@ class DealServiceTest {
 
   @Test
   void convertLeadToDeal_shouldThrowException_whenLeadNotFound() {
-    String leadId = "non-existent";
-    when(leadRepository.findById(leadId)).thenReturn(Optional.empty());
+    String leadId = UUID.randomUUID().toString();
+    when(leadRepository.findById(any(UUID.class))).thenReturn(Optional.empty());
 
     assertThatThrownBy(() -> dealService.convertLeadToDeal(leadId, BigDecimal.TEN))
-          .isInstanceOf(IllegalArgumentException.class)
-          .hasMessageContaining("Lead not found");
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining("Lead not found");
 
     verify(dealRepository, never()).save(any());
   }
 
   @Test
   void convertLeadToDeal_shouldThrowException_whenLeadNotQualified() {
-    String leadId = "lead-456";
-    Lead nonQualifiedLead = new Lead(leadId, "Jane", "jane@example.com",
-              "+987654321", "DesignStudio", "NEW", LocalDateTime.now());
-    when(leadRepository.findById(leadId)).thenReturn(Optional.of(nonQualifiedLead));
+    String leadIdStr = UUID.randomUUID().toString();
+    UUID leadUuid = UUID.fromString(leadIdStr);
+    Lead nonQualifiedLead = new Lead();
+    nonQualifiedLead.setId(leadUuid);
+    nonQualifiedLead.setStatus("NEW");
 
-    assertThatThrownBy(() -> dealService.convertLeadToDeal(leadId, new BigDecimal("5000")))
-          .isInstanceOf(IllegalStateException.class)
-          .hasMessageContaining("Only QUALIFIED leads");
+    when(leadRepository.findById(leadUuid)).thenReturn(Optional.of(nonQualifiedLead));
+
+    assertThatThrownBy(() -> dealService.convertLeadToDeal(leadIdStr, new BigDecimal("5000")))
+            .isInstanceOf(IllegalStateException.class)
+            .hasMessageContaining("Only QUALIFIED leads");
 
     verify(dealRepository, never()).save(any());
   }
@@ -104,8 +116,8 @@ class DealServiceTest {
     when(dealRepository.findById(dealId)).thenReturn(Optional.of(deal));
 
     assertThatThrownBy(() -> dealService.transitionDealStatus(dealId, DealStatus.NEW))
-          .isInstanceOf(IllegalStateException.class)
-          .hasMessageContaining("Cannot transition from WON to NEW");
+            .isInstanceOf(IllegalStateException.class)
+            .hasMessageContaining("Cannot transition from WON to NEW");
 
     verify(dealRepository, never()).save(any());
   }
@@ -116,7 +128,7 @@ class DealServiceTest {
     when(dealRepository.findById(nonExistentId)).thenReturn(Optional.empty());
 
     assertThatThrownBy(() -> dealService.transitionDealStatus(nonExistentId, DealStatus.QUALIFIED))
-          .isInstanceOf(IllegalArgumentException.class)
-          .hasMessageContaining("Deal not found");
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining("Deal not found");
   }
 }
