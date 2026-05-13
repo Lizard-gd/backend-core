@@ -15,7 +15,7 @@ content = @`
             <input type="text"
                    name="firstName"
                    required
-                   value="${lead.firstName()}"
+                   value="${lead.getFirstName()}"
                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 ${errors != null
 && errors.hasFieldErrors("firstName") ? "border-red-500" : ""}"
                    placeholder="Моё имя" />
@@ -32,7 +32,7 @@ content = @`
                 type="email"
                 id="email"
                 name="email"
-                value="${lead.email()}"
+                value="${lead.getEmail()}"
                 required
                 class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500
 ${errors != null && errors.hasFieldErrors("email") ? "border-red-500" : ""}"
@@ -51,7 +51,7 @@ ${errors != null && errors.hasFieldErrors("email") ? "border-red-500" : ""}"
                     type="text"
                     id="phone"
                     name="phone"
-                    value="${lead.phone()}"
+                    value="${lead.getPhone()}"
                     required
                     class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500
 ${errors != null && errors.hasFieldErrors("phone") ? "border-red-500" : ""}"
@@ -70,7 +70,7 @@ ${errors != null && errors.hasFieldErrors("phone") ? "border-red-500" : ""}"
                     type="text"
                     id="company"
                     name="company"
-                    value="${lead.company()}"
+                    value="${lead.getCompany()}"
                     required
                     class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500
 ${errors != null && errors.hasFieldErrors("company") ? "border-red-500" : ""}"
@@ -92,10 +92,10 @@ ${errors != null && errors.hasFieldErrors("company") ? "border-red-500" : ""}"
                     class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500
 ${errors != null && errors.hasFieldErrors("status") ? "border-red-500" : ""}"
                     >
-                <option value="NEW" selected?="${lead.status() == "NEW"}">NEW</option>
-                <option value="CONTACTED" selected?="${lead.status() == "CONTACTED"}">CONTACTED</option>
-                <option value="QUALIFIED" selected?="${lead.status() == "QUALIFIED"}">QUALIFIED</option>
-                <option value="LOST" selected?="${lead.status() == "LOST"}">LOST</option>
+                <option value="NEW" selected?="${lead.getStatus().equals("NEW")}">NEW</option>
+                <option value="CONTACTED" selected?="${lead.getStatus().equals("CONTACTED")}">CONTACTED</option>
+                <option value="QUALIFIED" selected?="${lead.getStatus().equals("QUALIFIED")}">QUALIFIED</option>
+                <option value="LOST" selected?="${lead.getStatus().equals("LOST")}">LOST</option>
             </select>
             @if(errors != null && errors.hasFieldErrors("status"))
                 <p class="text-red-600 text-sm mt-1">${errors.getFieldError("status").getDefaultMessage()}</p>

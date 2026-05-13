@@ -8,8 +8,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.ConnectionCallback;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
+import ru.mentee.power.crm.Application;
 
-@SpringBootTest(classes = ru.mentee.power.crm.spring.Application.class)
+@SpringBootTest(classes = Application.class)
 @ActiveProfiles("test")
 class DatabaseConfigTest {
 

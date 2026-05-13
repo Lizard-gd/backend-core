@@ -32,14 +32,18 @@ public class LeadService {
   }
 
   public Lead addLead(String firstName, String email, String phone, String company, String status) {
-    Optional<Lead> existing = repository.findByEmail(email);
+    Optional<Lead> existing = repository.findByEmailNative(email);
     if (existing.isPresent()) {
       throw new IllegalStateException("Lead with email already exists: " + email);
     }
 
-    String id = UUID.randomUUID().toString();
-    LocalDateTime now = LocalDateTime.now();
-    Lead newLead = new Lead(id, firstName, email, phone, company, status, now);
+    Lead newLead = new Lead();
+    newLead.setFirstName(firstName);
+    newLead.setEmail(email);
+    newLead.setPhone(phone);
+    newLead.setCompany(company);
+    newLead.setStatus(status);
+    newLead.setCreatedAt(LocalDateTime.now());
     repository.save(newLead);
 
     return newLead;
@@ -50,37 +54,35 @@ public class LeadService {
   }
 
   public List<Lead> findByStatus(String status) {
-    return repository.findAll().stream()
-            .filter(lead -> lead.status().equals(status))
-            .collect(Collectors.toList());
+    return repository.findByStatusNative(status);
   }
 
-  public Optional<Lead> findById(String id) {
+  public Optional<Lead> findById(UUID id) {
     return repository.findById(id);
   }
 
   public Optional<Lead> findByEmail(String email) {
-    return repository.findByEmail(email);
+    return repository.findByEmailNative(email);
   }
 
-  public Lead update(String id, Lead updatedLead) {
+  public Lead update(UUID id, Lead updatedLead) {
     Optional<Lead> existing = repository.findById(id);
     if (existing.isEmpty()) {
       throw new IllegalArgumentException("Lead not found with id: " + id);
     }
-    LocalDateTime originalCreatedAt = existing.get().createdAt();
-    Lead leadToSave = new Lead(id, updatedLead.firstName(), updatedLead.email(),
-            updatedLead.phone(), updatedLead.company(),
-            updatedLead.status(), originalCreatedAt);
+    LocalDateTime originalCreatedAt = existing.get().getCreatedAt();
+    Lead leadToSave = new Lead(id, updatedLead.getFirstName(), updatedLead.getEmail(),
+            updatedLead.getPhone(), updatedLead.getCompany(),
+            updatedLead.getStatus(), originalCreatedAt);
     repository.save(leadToSave);
     return leadToSave;
   }
 
-  public void delete(String id) {
+  public void delete(UUID id) {
     Optional<Lead> existing = repository.findById(id);
     if (existing.isEmpty()) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Lead not found with id: " + id);
-    } repository.delete(id);
+    } repository.deleteById(id);
   }
 
   public List<Lead> findLeads(String search, String status,
@@ -92,18 +94,18 @@ public class LeadService {
     if (search != null && !search.isBlank()) {
       String lowerSearch = search.toLowerCase();
       stream = stream.filter(lead ->
-              lead.firstName().toLowerCase().contains(lowerSearch)
-                      || lead.email().toLowerCase().contains(lowerSearch)
+              lead.getFirstName().toLowerCase().contains(lowerSearch)
+                      || lead.getEmail().toLowerCase().contains(lowerSearch)
       );
     }
     if (status != null && !status.isBlank()) {
-      stream = stream.filter(lead -> lead.status().equals(status));
+      stream = stream.filter(lead -> lead.getStatus().equals(status));
     }
     if (fromDateTime != null) {
-      stream = stream.filter(lead -> !lead.createdAt().isBefore(fromDateTime));
+      stream = stream.filter(lead -> !lead.getCreatedAt().isBefore(fromDateTime));
     }
     if (toDateTime != null) {
-      stream = stream.filter(lead -> !lead.createdAt().isAfter(toDateTime));
+      stream = stream.filter(lead -> !lead.getCreatedAt().isAfter(toDateTime));
     }
     return stream.collect(Collectors.toList());
   }

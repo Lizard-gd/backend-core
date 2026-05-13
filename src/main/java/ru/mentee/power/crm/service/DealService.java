@@ -3,6 +3,7 @@ package ru.mentee.power.crm.service;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
@@ -23,12 +24,13 @@ public class DealService {
   }
 
   public Deal convertLeadToDeal(String leadId, BigDecimal amount) {
-    Lead lead = leadRepository.findById(leadId)
-            .orElseThrow(() -> new IllegalArgumentException("Lead not found with id: " + leadId));
+    UUID leadUuid = UUID.fromString(leadId);
+    Lead lead = leadRepository.findById(leadUuid)
+            .orElseThrow(() -> new IllegalArgumentException("Lead not found with id: " +  leadId));
 
-    if (!"QUALIFIED".equals(lead.status())) {
+    if (!"QUALIFIED".equals(lead.getStatus())) {
       throw new IllegalStateException("Only QUALIFIED leads can be converted to deals. "
-                + "Current status: " + lead.status());
+                + "Current status: " + lead.getStatus());
     }
 
     Deal newDeal = new Deal(leadId, amount);

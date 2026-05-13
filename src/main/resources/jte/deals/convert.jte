@@ -5,11 +5,11 @@
     <div class="max-w-md mx-auto mt-8">
         <h1 class="text-2xl font-bold mb-6">Конвертация лида в сделку</h1>
         <div class="bg-white rounded shadow-md p-6">
-            <p class="mb-2"><strong>Лид:</strong> ${lead.firstName()} (${lead.email()})</p>
-            <p class="mb-4"><strong>Компания:</strong> ${lead.company()}</p>
+            <p class="mb-2"><strong>Лид:</strong> ${lead.getFirstName()} (${lead.getEmail()})</p>
+            <p class="mb-4"><strong>Компания:</strong> ${lead.getCompany()}</p>
 
             <form method="post" action="/deals/convert" class="space-y-4">
-                <input type="hidden" name="leadId" value="${lead.id()}">
+                <input type="hidden" name="leadId" value="${lead.getId().toString()}">
                 <div>
                     <label class="block text-sm font-medium text-gray-700">Сумма сделки (₽)</label>
                     <input type="number" name="amount" step="0.01" required

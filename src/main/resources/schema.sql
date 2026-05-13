@@ -1,7 +1,7 @@
 -- Таблица Leads (потенциальные клиенты)
 CREATE TABLE IF NOT EXISTS leads (
                                      id UUID PRIMARY KEY,
-                                     name VARCHAR(255) NOT NULL,
+                                     first_name VARCHAR(255) NOT NULL,
     email VARCHAR(255) NOT NULL UNIQUE,
     phone VARCHAR(50),
     company VARCHAR(255),
