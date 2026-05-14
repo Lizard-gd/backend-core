@@ -15,6 +15,12 @@ import org.springframework.web.server.ResponseStatusException;
 import ru.mentee.power.crm.model.Lead;
 import ru.mentee.power.crm.repository.LeadRepository;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.transaction.annotation.Transactional;
+
 @Service
 public class LeadService {
 
@@ -108,5 +114,32 @@ public class LeadService {
       stream = stream.filter(lead -> !lead.getCreatedAt().isAfter(toDateTime));
     }
     return stream.collect(Collectors.toList());
+  }
+
+  public Optional<Lead> findByEmailDerived(String email) {
+    return repository.findByEmail(email);
+  }
+
+  public List<Lead> findByStatuses(List<String> statuses) {
+    return repository.findByStatusIn(statuses);
+  }
+
+  public Page<Lead> getLeadsByCompany(String company, int page, int size) {
+    Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+    return repository.findByCompany(company, pageable);
+  }
+
+  @Transactional
+  public int bulkUpdateStatus(String oldStatus, String newStatus) {
+    int updated = repository.updateStatusBulk(oldStatus, newStatus);
+    System.out.println("Bulk update: " + updated + " leads changed from " + oldStatus + " to " + newStatus);
+    return updated;
+  }
+
+  @Transactional
+  public int bulkDeleteByStatus(String status) {
+    int deleted = repository.deleteByStatusBulk(status);
+    System.out.println("Bulk delete: " + deleted + " leads with status " + status + " removed");
+    return deleted;
   }
 }
