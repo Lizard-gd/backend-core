@@ -12,7 +12,7 @@ public class MockLeadService extends LeadService {
   private final List<Lead> mockLeads;
 
   public MockLeadService() {
-    super(null);
+    super(null, null, null);
     Lead lead1 = new Lead();
     lead1.setId(UUID.randomUUID());
     lead1.setFirstName("Test Lead 1");

@@ -2,6 +2,7 @@ package ru.mentee.power.crm.spring;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -11,8 +12,17 @@ import ru.mentee.power.crm.service.LeadService;
 
 @SpringBootTest
 public class LeadServiceBeanTest {
+
   @Autowired
   private ApplicationContext context;
+
+  @Autowired
+  private LeadRepository leadRepository;
+
+  @BeforeEach
+  void cleanUp() {
+    leadRepository.deleteAll();
+  }
 
   @Test
   void shouldCreateLeadServiceBean() {

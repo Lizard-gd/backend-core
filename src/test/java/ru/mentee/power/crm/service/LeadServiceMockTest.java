@@ -21,6 +21,7 @@ import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import ru.mentee.power.crm.model.Lead;
+import ru.mentee.power.crm.repository.DealRepository;
 import ru.mentee.power.crm.repository.LeadRepository;
 
 @ExtendWith(MockitoExtension.class)
@@ -29,16 +30,21 @@ public class LeadServiceMockTest {
   @Mock
   private LeadRepository mockRepository;
 
+  @Mock
+  private DealRepository mockDealRepository;
+
+  @Mock
+  private LeadProcessor mockLeadProcessor;
+
   private LeadService service;
 
   @BeforeEach
   void setUp() {
-    service = new LeadService(mockRepository);
+    service = new LeadService(mockRepository, mockDealRepository, mockLeadProcessor);
   }
 
   @Test
   void shouldCallRepositorySave_whenAddingNewLead() {
-    // Используем findByEmailNative вместо findByEmail
     when(mockRepository.findByEmailNative(anyString())).thenReturn(Optional.empty());
 
     Lead result = service.addLead("TestUser", "test@example.com",

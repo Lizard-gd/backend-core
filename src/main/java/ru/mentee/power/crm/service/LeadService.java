@@ -9,26 +9,33 @@ import java.util.stream.Collectors;
 import jakarta.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpStatus;
-import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
-import ru.mentee.power.crm.model.Lead;
-import ru.mentee.power.crm.repository.LeadRepository;
-
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
+import ru.mentee.power.crm.dto.CreateDealRequest;
+import ru.mentee.power.crm.model.Deal;
+import ru.mentee.power.crm.model.Lead;
+import ru.mentee.power.crm.repository.DealRepository;
+import ru.mentee.power.crm.repository.LeadRepository;
 
 @Service
 public class LeadService {
 
   private static final Logger log = LoggerFactory.getLogger(LeadService.class);
   private final LeadRepository repository;
+  private final DealRepository dealRepository;
+  private final LeadProcessor leadProcessor;
 
-  public LeadService(LeadRepository repository) {
+  public LeadService(LeadRepository repository,
+                     DealRepository dealRepository, LeadProcessor leadProcessor) {
     this.repository = repository;
+    this.dealRepository = dealRepository;
+    this.leadProcessor = leadProcessor;
     log.info("LeadService constructor called");
   }
 
@@ -132,7 +139,8 @@ public class LeadService {
   @Transactional
   public int bulkUpdateStatus(String oldStatus, String newStatus) {
     int updated = repository.updateStatusBulk(oldStatus, newStatus);
-    System.out.println("Bulk update: " + updated + " leads changed from " + oldStatus + " to " + newStatus);
+    System.out.println("Bulk update: " + updated + " leads changed from "
+            + oldStatus + " to " + newStatus);
     return updated;
   }
 
@@ -141,5 +149,32 @@ public class LeadService {
     int deleted = repository.deleteByStatusBulk(status);
     System.out.println("Bulk delete: " + deleted + " leads with status " + status + " removed");
     return deleted;
+  }
+
+  @Transactional
+  public Deal convertLeadToDeal(UUID leadId, CreateDealRequest request) {
+    Lead lead = repository.findById(leadId)
+            .orElseThrow(() -> new IllegalArgumentException("Lead not found: " + leadId));
+
+    if (!"QUALIFIED".equals(lead.getStatus())) {
+      throw new IllegalStateException(
+              "Lead " + leadId + " cannot be converted. Current status: " + lead.getStatus()
+      );
+    }
+
+    Deal newDeal = new Deal(leadId.toString(), request.getAmount());
+    dealRepository.save(newDeal);
+
+    lead.setStatus("CONVERTED");
+    repository.save(lead);
+
+    return newDeal;
+  }
+
+  @Transactional
+  public void processLeads(List<UUID> leadIds) {
+    for (UUID id : leadIds) {
+      leadProcessor.processSingleLead(id);
+    }
   }
 }
