@@ -10,7 +10,8 @@ CREATE TABLE IF NOT EXISTS leads (
     created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE,
                              created_by UUID,
-                             assigned_to UUID
+                             assigned_to UUID,
+                             version BIGINT NOT NULL DEFAULT 0
                              );
 
 -- Индекс для быстрого поиска по email
