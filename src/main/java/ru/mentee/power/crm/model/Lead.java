@@ -9,12 +9,15 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.persistence.Version;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
+import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
 @Table(name = "leads")
@@ -53,4 +56,30 @@ public class Lead {
 
   @Column(name = "created_at", nullable = false, updatable = false)
       LocalDateTime createdAt;
+
+  @Version
+  @Column(name = "version", nullable = false)
+  @Setter(AccessLevel.NONE)
+  private Long version;
+
+  public Lead(String firstName, String email, String phone, String company,
+              String status, LocalDateTime createdAt) {
+    this.firstName = firstName;
+    this.email = email;
+    this.phone = phone;
+    this.company = company;
+    this.status = status;
+    this.createdAt = createdAt;
+  }
+
+  public Lead(UUID id, String firstName, String email, String phone, String company,
+              String status, LocalDateTime createdAt) {
+    this.id = id;
+    this.firstName = firstName;
+    this.email = email;
+    this.phone = phone;
+    this.company = company;
+    this.status = status;
+    this.createdAt = createdAt;
+  }
 }
