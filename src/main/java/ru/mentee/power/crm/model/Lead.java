@@ -5,9 +5,12 @@ import java.util.UUID;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.Version;
 import jakarta.validation.constraints.Email;
@@ -46,9 +49,9 @@ public class Lead {
               message = "Телефон должен начинаться с '+' и содержать от 6 до 15 цифр")
       String phone;
 
-  @Column(nullable = false)
-      @NotBlank(message = "Компания обязательна")
-      String company;
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "company_id")
+  private Company company;
 
   @Column(nullable = false)
       @NotBlank(message = "Статус обязателен")
@@ -62,23 +65,21 @@ public class Lead {
   @Setter(AccessLevel.NONE)
   private Long version;
 
-  public Lead(String firstName, String email, String phone, String company,
-              String status, LocalDateTime createdAt) {
+  public Lead(String firstName, String email,
+              String phone, String status, LocalDateTime createdAt) {
     this.firstName = firstName;
     this.email = email;
     this.phone = phone;
-    this.company = company;
     this.status = status;
     this.createdAt = createdAt;
   }
 
-  public Lead(UUID id, String firstName, String email, String phone, String company,
-              String status, LocalDateTime createdAt) {
+  public Lead(UUID id, String firstName, String email,
+              String phone, String status, LocalDateTime createdAt) {
     this.id = id;
     this.firstName = firstName;
     this.email = email;
     this.phone = phone;
-    this.company = company;
     this.status = status;
     this.createdAt = createdAt;
   }

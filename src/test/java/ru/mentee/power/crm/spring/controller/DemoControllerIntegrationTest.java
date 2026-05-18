@@ -27,10 +27,10 @@ class DemoControllerIntegrationTest {
   @Autowired
   private MockMvc mockMvc;
 
-  @MockitoBean  // Мокаем зависимость LeadService
+  @MockitoBean
   private LeadService leadService;
 
-  @MockitoBean  // Мокаем LeadRepository (хотя он и не используется напрямую в DemoController)
+  @MockitoBean
   private LeadRepository leadRepository;
 
   @Test

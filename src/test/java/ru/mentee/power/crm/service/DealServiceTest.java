@@ -17,6 +17,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import ru.mentee.power.crm.model.Company;
 import ru.mentee.power.crm.model.Deal;
 import ru.mentee.power.crm.model.DealStatus;
 import ru.mentee.power.crm.model.Lead;
@@ -43,12 +44,17 @@ class DealServiceTest {
   void convertLeadToDeal_shouldCreateDeal_whenLeadExistsAndQualified() {
     String leadIdStr = UUID.randomUUID().toString();
     UUID leadUuid = UUID.fromString(leadIdStr);
+
+    Company company = new Company();
+    company.setId(UUID.randomUUID());
+    company.setName("TechCorp");
+
     Lead qualifiedLead = new Lead();
     qualifiedLead.setId(leadUuid);
     qualifiedLead.setFirstName("John");
     qualifiedLead.setEmail("john@example.com");
     qualifiedLead.setPhone("+123456789");
-    qualifiedLead.setCompany("TechCorp");
+    qualifiedLead.setCompany(company);
     qualifiedLead.setStatus("QUALIFIED");
     qualifiedLead.setCreatedAt(LocalDateTime.now());
 

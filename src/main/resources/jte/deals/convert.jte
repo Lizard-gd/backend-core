@@ -6,7 +6,7 @@
         <h1 class="text-2xl font-bold mb-6">Конвертация лида в сделку</h1>
         <div class="bg-white rounded shadow-md p-6">
             <p class="mb-2"><strong>Лид:</strong> ${lead.getFirstName()} (${lead.getEmail()})</p>
-            <p class="mb-4"><strong>Компания:</strong> ${lead.getCompany()}</p>
+            <p class="mb-4"><strong>Компания:</strong> ${lead.getCompany() != null ? lead.getCompany().getName() : "—"}</p>
 
             <form method="post" action="/deals/convert" class="space-y-4">
                 <input type="hidden" name="leadId" value="${lead.getId().toString()}">

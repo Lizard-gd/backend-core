@@ -1,5 +1,8 @@
 @import ru.mentee.power.crm.model.Lead
+@import ru.mentee.power.crm.model.Company
+@import java.util.List
 @param Lead lead
+@param List<Company> companies
 @param org.springframework.validation.BindingResult errors = null
 
 <!DOCTYPE html>
@@ -47,9 +50,15 @@
 
         <div class="mb-4">
             <label class="block text-gray-700 font-bold mb-2">Компания</label>
-            <input type="text" name="company" value="${lead.getCompany()}"
-                   class="w-full px-3 py-2 border rounded ${errors != null
-&& errors.hasFieldErrors("company") ? "border-red-500" : "border-gray-300"}">
+            <select name="companyId" class="w-full px-3 py-2 border rounded ${errors != null && errors.hasFieldErrors("company") ? "border-red-500" : "border-gray-300"}">
+                <option value="">— Без компании —</option>
+                @for(Company c : companies)
+                    <option value="${c.getId().toString()}"
+                            selected?="${lead.getCompany() != null && lead.getCompany().getId().equals(c.getId())}">
+                        ${c.getName()} (${c.getIndustry() != null ? c.getIndustry() : ""})
+                    </option>
+                @endfor
+            </select>
             @if(errors != null && errors.hasFieldErrors("company"))
                 <p class="text-red-600 text-sm mt-1">${errors.getFieldError("company").getDefaultMessage()}</p>
             @endif

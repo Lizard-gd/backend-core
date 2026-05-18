@@ -11,7 +11,7 @@ public class LeadControllerUnitTest {
   void shouldCreateControllerWithoutSpring() {
     MockLeadService mockService = new MockLeadService();
 
-    LeadController controller = new LeadController(mockService);
+    LeadController controller = new LeadController(mockService, null);
 
     String response = controller.home();
     assertThat(response).contains("2 leads");
@@ -20,7 +20,7 @@ public class LeadControllerUnitTest {
   @Test
   void shouldUseInjectedService() {
     MockLeadService mockService = new MockLeadService();
-    LeadController controller = new LeadController(mockService);
+    LeadController controller = new LeadController(mockService, null);
 
     String response = controller.home();
 

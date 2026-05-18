@@ -14,6 +14,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -22,22 +23,22 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.HttpStatus;
-import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.server.ResponseStatusException;
 import ru.mentee.power.crm.model.Lead;
+import ru.mentee.power.crm.repository.CompanyRepository;
+import ru.mentee.power.crm.repository.LeadRepository;
+import ru.mentee.power.crm.service.ChildService;
 import ru.mentee.power.crm.service.DealService;
+import ru.mentee.power.crm.service.LeadProcessor;
 import ru.mentee.power.crm.service.LeadService;
+import ru.mentee.power.crm.service.ParentService;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 @AutoConfigureMockMvc
-@TestPropertySource(properties = {
-  "spring.autoconfigure.exclude="
-                + "org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration,"
-                + "org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration,"
-                + "org.springframework.boot.autoconfigure.data.jpa.JpaRepositoriesAutoConfiguration"
-})
+@ActiveProfiles("test")
 class LeadControllerEditTest {
 
   @Autowired
@@ -49,6 +50,21 @@ class LeadControllerEditTest {
   @MockitoBean
   private DealService dealService;
 
+  @MockitoBean
+  private CompanyRepository companyRepository;
+
+  @MockitoBean
+  private LeadRepository leadRepository;
+
+  @MockitoBean
+  private ChildService childService;
+
+  @MockitoBean
+  private LeadProcessor leadProcessor;
+
+  @MockitoBean
+  private ParentService parentService;
+
   @Test
   void shouldShowEditFormWithPrefilledData() throws Exception {
     UUID leadId = UUID.randomUUID();
@@ -57,11 +73,12 @@ class LeadControllerEditTest {
     testLead.setFirstName("John");
     testLead.setEmail("test@example.com");
     testLead.setPhone("+123456789");
-    testLead.setCompany("Test Corp");
+    testLead.setCompany(null);
     testLead.setStatus("NEW");
     testLead.setCreatedAt(LocalDateTime.now());
 
     when(leadService.findById(leadId)).thenReturn(Optional.of(testLead));
+    when(companyRepository.findAll()).thenReturn(Collections.emptyList());
 
     mockMvc.perform(get("/leads/{id}/edit", leadId.toString()))
             .andExpect(status().isOk())
@@ -72,11 +89,16 @@ class LeadControllerEditTest {
   @Test
   void shouldUpdateLeadAndRedirect() throws Exception {
     UUID leadId = UUID.randomUUID();
+    UUID companyId = UUID.randomUUID();
+    Lead existingLead = new Lead();
+    existingLead.setId(leadId);
+    when(leadService.findById(leadId)).thenReturn(Optional.of(existingLead));
+
     mockMvc.perform(post("/leads/{id}", leadId.toString())
                     .param("firstName", "UpdatedName")
                     .param("email", "updated@example.com")
                     .param("phone", "+222222")
-                    .param("company", "Updated Corp")
+                    .param("companyId", companyId.toString())
                     .param("status", "QUALIFIED"))
             .andExpect(status().is3xxRedirection())
             .andExpect(redirectedUrl("/leads"));

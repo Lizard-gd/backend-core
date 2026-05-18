@@ -16,7 +16,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
+import ru.mentee.power.crm.model.Company;
 import ru.mentee.power.crm.model.Lead;
+import ru.mentee.power.crm.repository.CompanyRepository;
 import ru.mentee.power.crm.repository.LeadRepository;
 
 @SpringBootTest
@@ -28,16 +30,26 @@ class LeadLockingServiceTest {
   @Autowired
   private LeadRepository leadRepository;
 
+  @Autowired
+  private CompanyRepository companyRepository;
+
   private UUID testLeadId;
 
   @BeforeEach
   void setUp() {
     leadRepository.deleteAll();
+    companyRepository.deleteAll();
+
+    Company company = new Company();
+    company.setName("LockCorp");
+    company.setIndustry("Testing");
+    company = companyRepository.save(company);
+
     Lead lead = new Lead();
     lead.setFirstName("LockTest");
     lead.setEmail("locktest@example.com");
     lead.setPhone("+1234567890");
-    lead.setCompany("LockCorp");
+    lead.setCompany(company);
     lead.setStatus("NEW");
     lead.setCreatedAt(LocalDateTime.now());
     lead = leadRepository.save(lead);

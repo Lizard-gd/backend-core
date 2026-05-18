@@ -16,8 +16,10 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
 import org.springframework.transaction.annotation.Transactional;
 import ru.mentee.power.crm.dto.CreateDealRequest;
+import ru.mentee.power.crm.model.Company;
 import ru.mentee.power.crm.model.Deal;
 import ru.mentee.power.crm.model.Lead;
+import ru.mentee.power.crm.repository.CompanyRepository;
 import ru.mentee.power.crm.repository.DealRepository;
 import ru.mentee.power.crm.repository.LeadRepository;
 
@@ -34,38 +36,63 @@ class LeadServiceIntegrationTest {
   @Autowired
   private DealRepository dealRepository;
 
+  @Autowired
+  private CompanyRepository companyRepository;
+
+  private Company testCompany;
+  private Company qualifiedCorp;
+  private Company nowCorp;
+  private Company pastCorp;
+  private Company pageCompany;
+  private Company derivedCorp;
+  private Company statusCorp;
+
   @BeforeEach
   void setUp() {
     leadRepository.deleteAll();
+    companyRepository.deleteAll();
+
+    testCompany = createCompany("Test Company", "IT");
+    qualifiedCorp = createCompany("Qualified Corp", "Finance");
+    nowCorp = createCompany("NowCorp", "Tech");
+    pastCorp = createCompany("PastCorp", "Retail");
+    pageCompany = createCompany("PageCompany", "Media");
+    derivedCorp = createCompany("DerivedCorp", "Consulting");
+    statusCorp = createCompany("StatusCorp", "General");
 
     for (int i = 1; i <= 3; i++) {
       Lead lead = new Lead();
       lead.setFirstName("Lead" + i);
       lead.setEmail("lead" + i + "@test.com");
       lead.setPhone("+100000000" + i);
-      lead.setCompany("Test Company");
+      lead.setCompany(testCompany);
       lead.setStatus("NEW");
       lead.setCreatedAt(LocalDateTime.now());
       leadRepository.save(lead);
     }
-
 
     for (int i = 1; i <= 2; i++) {
       Lead lead = new Lead();
       lead.setFirstName("Contacted" + i);
       lead.setEmail("contacted" + i + "@test.com");
       lead.setPhone("+200000000" + i);
-      lead.setCompany("Test Company");
+      lead.setCompany(testCompany);
       lead.setStatus("CONTACTED");
       lead.setCreatedAt(LocalDateTime.now());
       leadRepository.save(lead);
     }
   }
 
+  private Company createCompany(String name, String industry) {
+    Company company = new Company();
+    company.setName(name);
+    company.setIndustry(industry);
+    return companyRepository.save(company);
+  }
+
   @Test
   void bulkUpdateStatus_shouldChangeAllLeadsWithOldStatus() {
     int updated = leadService.bulkUpdateStatus("NEW", "QUALIFIED");
-
     assertThat(updated).isEqualTo(3);
 
     long newCount = leadRepository.countByStatus("NEW");
@@ -78,7 +105,6 @@ class LeadServiceIntegrationTest {
   @Test
   void bulkDeleteByStatus_shouldRemoveAllLeadsWithGivenStatus() {
     int deleted = leadService.bulkDeleteByStatus("CONTACTED");
-
     assertThat(deleted).isEqualTo(2);
 
     long contactedCount = leadRepository.countByStatus("CONTACTED");
@@ -91,7 +117,6 @@ class LeadServiceIntegrationTest {
   @Test
   void bulkUpdateStatus_shouldReturnZero_whenNoLeadsWithOldStatus() {
     int updated = leadService.bulkUpdateStatus("WON", "LOST");
-
     assertThat(updated).isEqualTo(0);
   }
 
@@ -100,7 +125,7 @@ class LeadServiceIntegrationTest {
     lead.setFirstName("Qualified");
     lead.setEmail("qualified_" + UUID.randomUUID() + "@test.com");
     lead.setPhone("+1234567890");
-    lead.setCompany("Qualified Corp");
+    lead.setCompany(qualifiedCorp);
     lead.setStatus("QUALIFIED");
     lead.setCreatedAt(LocalDateTime.now());
     return leadRepository.save(lead);
@@ -147,7 +172,7 @@ class LeadServiceIntegrationTest {
     leadNow.setFirstName("Now");
     leadNow.setEmail("now2@test.com");
     leadNow.setPhone("+3333333333");
-    leadNow.setCompany("NowCorp");
+    leadNow.setCompany(nowCorp);
     leadNow.setStatus("NEW");
     leadNow.setCreatedAt(LocalDateTime.now());
     leadRepository.save(leadNow);
@@ -156,7 +181,7 @@ class LeadServiceIntegrationTest {
     leadPast.setFirstName("Past");
     leadPast.setEmail("past2@test.com");
     leadPast.setPhone("+4444444444");
-    leadPast.setCompany("PastCorp");
+    leadPast.setCompany(pastCorp);
     leadPast.setStatus("NEW");
     leadPast.setCreatedAt(LocalDateTime.now().minusDays(2));
     leadRepository.save(leadPast);
@@ -174,7 +199,7 @@ class LeadServiceIntegrationTest {
     lead.setFirstName("Derived");
     lead.setEmail("derived@test.com");
     lead.setPhone("+5555555555");
-    lead.setCompany("DerivedCorp");
+    lead.setCompany(derivedCorp);
     lead.setStatus("NEW");
     lead.setCreatedAt(LocalDateTime.now());
     leadRepository.save(lead);
@@ -186,25 +211,24 @@ class LeadServiceIntegrationTest {
 
   @Test
   void getLeadsByCompany_shouldReturnPagedResults() {
-    String company = "PageCompany";
     for (int i = 1; i <= 5; i++) {
       Lead lead = new Lead();
       lead.setFirstName("Page" + i);
       lead.setEmail("page" + i + "@test.com");
       lead.setPhone("+900000000" + i);
-      lead.setCompany(company);
+      lead.setCompany(pageCompany);
       lead.setStatus("NEW");
       lead.setCreatedAt(LocalDateTime.now().minusHours(i));
       leadRepository.save(lead);
     }
 
-    Page<Lead> page = leadService.getLeadsByCompany(company, 0, 2);
+    Page<Lead> page = leadService.getLeadsByCompany(pageCompany.getName(), 0, 2);
     assertThat(page.getContent()).hasSize(2);
     assertThat(page.getTotalElements()).isEqualTo(5);
     assertThat(page.getTotalPages()).isEqualTo(3);
     assertThat(page.getNumber()).isEqualTo(0);
 
-    Page<Lead> secondPage = leadService.getLeadsByCompany(company, 1, 2);
+    Page<Lead> secondPage = leadService.getLeadsByCompany(pageCompany.getName(), 1, 2);
     assertThat(secondPage.getContent()).hasSize(2);
     assertThat(secondPage.getNumber()).isEqualTo(1);
   }
@@ -227,7 +251,7 @@ class LeadServiceIntegrationTest {
     lead.setFirstName("StatusTest");
     lead.setEmail("status_" + UUID.randomUUID() + "@test.com");
     lead.setPhone("+0000000000");
-    lead.setCompany("StatusCorp");
+    lead.setCompany(statusCorp);
     lead.setStatus(status);
     lead.setCreatedAt(LocalDateTime.now());
     return lead;

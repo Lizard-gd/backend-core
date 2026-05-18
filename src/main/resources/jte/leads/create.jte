@@ -1,4 +1,8 @@
-@param ru.mentee.power.crm.model.Lead lead
+@import ru.mentee.power.crm.model.Lead
+@import ru.mentee.power.crm.model.Company
+@import java.util.List
+@param Lead lead
+@param List<Company> companies
 @param org.springframework.validation.BindingResult errors = null
 
 @template.layout.main(
@@ -63,22 +67,13 @@ ${errors != null && errors.hasFieldErrors("phone") ? "border-red-500" : ""}"
         </div>
         <!-- Company -->
         <div>
-            <label for="company" class="block text-sm font-medium text-gray-700 mb-1">
-                Компания
-            </label>
-            <input
-                    type="text"
-                    id="company"
-                    name="company"
-                    value="${lead.getCompany()}"
-                    required
-                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500
-${errors != null && errors.hasFieldErrors("company") ? "border-red-500" : ""}"
-                    placeholder="Test Corp"
-            />
-            @if(errors != null && errors.hasFieldErrors("company"))
-                <p class="text-red-600 text-sm mt-1">${errors.getFieldError("company").getDefaultMessage()}</p>
-            @endif
+            <label for="companyId" class="block text-sm font-medium text-gray-700 mb-1">Компания</label>
+            <select id="companyId" name="companyId" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500">
+                <option value="">— Без компании —</option>
+                @for(Company c : companies)
+                    <option value="${c.getId().toString()}">${c.getName()} (${c.getIndustry() != null ? c.getIndustry() : ""})</option>
+                @endfor
+            </select>
         </div>
         <!-- Status -->
         <div>

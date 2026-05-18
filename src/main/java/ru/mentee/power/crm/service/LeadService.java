@@ -18,8 +18,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 import ru.mentee.power.crm.dto.CreateDealRequest;
+import ru.mentee.power.crm.model.Company;
 import ru.mentee.power.crm.model.Deal;
 import ru.mentee.power.crm.model.Lead;
+import ru.mentee.power.crm.repository.CompanyRepository;
 import ru.mentee.power.crm.repository.DealRepository;
 import ru.mentee.power.crm.repository.LeadRepository;
 
@@ -30,12 +32,16 @@ public class LeadService {
   private final LeadRepository repository;
   private final DealRepository dealRepository;
   private final LeadProcessor leadProcessor;
+  private final CompanyRepository companyRepository;
 
   public LeadService(LeadRepository repository,
-                     DealRepository dealRepository, LeadProcessor leadProcessor) {
+                     DealRepository dealRepository,
+                     LeadProcessor leadProcessor,
+                     CompanyRepository companyRepository) {
     this.repository = repository;
     this.dealRepository = dealRepository;
     this.leadProcessor = leadProcessor;
+    this.companyRepository = companyRepository;
     log.info("LeadService constructor called");
   }
 
@@ -44,7 +50,7 @@ public class LeadService {
     log.info("LeadService @PostConstruct init() called - Bean lifecycle phase");
   }
 
-  public Lead addLead(String firstName, String email, String phone, String company, String status) {
+  public Lead addLead(String firstName, String email, String phone, String status, UUID companyId) {
     Optional<Lead> existing = repository.findByEmailNative(email);
     if (existing.isPresent()) {
       throw new IllegalStateException("Lead with email already exists: " + email);
@@ -54,12 +60,21 @@ public class LeadService {
     newLead.setFirstName(firstName);
     newLead.setEmail(email);
     newLead.setPhone(phone);
-    newLead.setCompany(company);
     newLead.setStatus(status);
     newLead.setCreatedAt(LocalDateTime.now());
-    repository.save(newLead);
 
+    if (companyId != null) {
+      Company company = companyRepository.findById(companyId)
+              .orElseThrow(() -> new IllegalArgumentException("Company not found: " + companyId));
+      newLead.setCompany(company);
+    }
+
+    repository.save(newLead);
     return newLead;
+  }
+
+  public Lead addLead(String firstName, String email, String phone, String status) {
+    return addLead(firstName, email, phone, status, null);
   }
 
   public List<Lead> findAll() {
@@ -78,17 +93,21 @@ public class LeadService {
     return repository.findByEmailNative(email);
   }
 
+  @Transactional
   public Lead update(UUID id, Lead updatedLead) {
-    Optional<Lead> existing = repository.findById(id);
-    if (existing.isEmpty()) {
-      throw new IllegalArgumentException("Lead not found with id: " + id);
+    Lead existing = repository.findById(id)
+            .orElseThrow(() -> new IllegalArgumentException("Lead not found with id: " + id));
+
+    existing.setFirstName(updatedLead.getFirstName());
+    existing.setEmail(updatedLead.getEmail());
+    existing.setPhone(updatedLead.getPhone());
+    existing.setStatus(updatedLead.getStatus());
+
+    if (updatedLead.getCompany() != null) {
+      existing.setCompany(updatedLead.getCompany());
     }
-    LocalDateTime originalCreatedAt = existing.get().getCreatedAt();
-    Lead leadToSave = new Lead(id, updatedLead.getFirstName(), updatedLead.getEmail(),
-            updatedLead.getPhone(), updatedLead.getCompany(),
-            updatedLead.getStatus(), originalCreatedAt);
-    repository.save(leadToSave);
-    return leadToSave;
+
+    return repository.save(existing);
   }
 
   public void delete(UUID id) {
@@ -131,9 +150,9 @@ public class LeadService {
     return repository.findByStatusIn(statuses);
   }
 
-  public Page<Lead> getLeadsByCompany(String company, int page, int size) {
+  public Page<Lead> getLeadsByCompany(String companyName, int page, int size) {
     Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
-    return repository.findByCompany(company, pageable);
+    return repository.findByCompanyName(companyName, pageable);
   }
 
   @Transactional

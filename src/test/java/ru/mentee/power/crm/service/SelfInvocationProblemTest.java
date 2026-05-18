@@ -8,10 +8,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import ru.mentee.power.crm.model.Company;
 import ru.mentee.power.crm.model.Lead;
+import ru.mentee.power.crm.repository.CompanyRepository;
 import ru.mentee.power.crm.repository.LeadRepository;
 
 @SpringBootTest
@@ -23,17 +26,32 @@ class SelfInvocationProblemTest {
   @Autowired
   private LeadRepository leadRepository;
 
+  @Autowired
+  private CompanyRepository companyRepository;
+
+  private Company testCompany;
+
+  @BeforeEach
+  void setUp() {
+    leadRepository.deleteAll();
+    companyRepository.deleteAll();
+
+    testCompany = new Company();
+    testCompany.setName("SelfTest");
+    testCompany.setIndustry("Testing");
+    testCompany = companyRepository.save(testCompany);
+  }
+
   @Test
   void demonstrateSelfInvocationProblem() {
     List<UUID> ids = new ArrayList<>();
     try {
-
       for (int i = 1; i <= 3; i++) {
         Lead lead = new Lead();
         lead.setFirstName("SelfInvoke" + i);
         lead.setEmail("self" + i + "@test.com");
         lead.setPhone("+30000000" + i);
-        lead.setCompany("SelfTest");
+        lead.setCompany(testCompany);
         lead.setStatus("NEW");
         lead.setCreatedAt(LocalDateTime.now());
         leadRepository.save(lead);

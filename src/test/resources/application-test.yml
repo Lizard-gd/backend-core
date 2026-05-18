@@ -15,6 +15,15 @@ spring:
         dialect: org.hibernate.dialect.H2Dialect
         format_sql: true
 
+  liquibase:
+    change-log: classpath:db/changelog/db.changelog-master.xml
+    enabled: true
+    drop-first: true
+
+  sql:
+    init:
+      mode: never
+
   h2:
     console:
       enabled: true
@@ -23,3 +32,4 @@ logging:
   level:
     org.hibernate.SQL: DEBUG
     org.hibernate.orm.jdbc.bind: TRACE
+    liquibase: DEBUG
