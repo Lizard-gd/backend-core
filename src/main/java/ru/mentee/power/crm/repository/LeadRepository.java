@@ -59,4 +59,18 @@ public interface LeadRepository extends JpaRepository<Lead, UUID> {
   @Lock(LockModeType.PESSIMISTIC_WRITE)
   @Query("SELECT l FROM Lead l WHERE l.id = :id")
   Optional<Lead> findByIdForUpdate(@Param("id") UUID id);
+
+  List<Lead> findByCompanyId(UUID companyId);
+
+  Page<Lead> findByCompanyId(UUID companyId, Pageable pageable);
+
+  @Query("SELECT l FROM Lead l JOIN l.company c WHERE c.name = :companyName")
+  List<Lead> findByCompanyName(@Param("companyName") String companyName);
+
+  @Query("SELECT l FROM Lead l JOIN l.company c WHERE c.name = :companyName")
+  Page<Lead> findByCompanyName(@Param("companyName") String companyName, Pageable pageable);
+
+  @Query("SELECT l FROM Lead l WHERE l.status = :status AND l.company.id = :companyId")
+  List<Lead> findByStatusAndCompanyId(@Param("status") String status,
+                                      @Param("companyId") UUID companyId);
 }

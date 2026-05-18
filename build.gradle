@@ -73,6 +73,8 @@ ext {
     testRuntimeOnly 'com.h2database:h2:2.4.240'
 
     testImplementation 'org.assertj:assertj-core:3.27.7'
+
+    implementation 'org.liquibase:liquibase-core'
 }
 
 checkstyle {
@@ -152,7 +154,7 @@ tasks.register('runSpring', JavaExec) {
 }
 
 jte {
-    sourceDirectory = file("src/main/jte").toPath()
+    sourceDirectory = file("src/main/resources/jte").toPath()
     contentType = gg.jte.ContentType.Html
     binaryStaticContent = false
 }

@@ -22,7 +22,10 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
+import ru.mentee.power.crm.model.Company;
 import ru.mentee.power.crm.model.Lead;
+import ru.mentee.power.crm.repository.CompanyRepository;
+import ru.mentee.power.crm.repository.DealRepository;
 import ru.mentee.power.crm.repository.LeadRepository;
 
 @ExtendWith(MockitoExtension.class)
@@ -31,30 +34,43 @@ class LeadServiceTest {
   @Mock
   private LeadRepository repository;
 
+  @Mock
+  private DealRepository dealRepository;
+
+  @Mock
+  private LeadProcessor leadProcessor;
+
+  @Mock
+  private CompanyRepository companyRepository;
+
   @InjectMocks
   private LeadService service;
 
+  private Company createCompany(String name) {
+    Company company = new Company();
+    company.setId(UUID.randomUUID());
+    company.setName(name);
+    return company;
+  }
+
   @Test
   void shouldCreateLead_whenEmailIsUnique() {
-
     when(repository.findByEmailNative(anyString())).thenReturn(Optional.empty());
-
     when(repository.save(any(Lead.class))).thenAnswer(invocation -> {
       Lead lead = invocation.getArgument(0);
-
       if (lead.getId() == null) {
         lead.setId(UUID.randomUUID());
       }
       return lead;
     });
 
-    Lead result = service.addLead("Ivan", "unique@example.com", "+123456789", "Test Corp", "NEW");
+    Lead result = service.addLead("Ivan", "unique@example.com", "+123456789", "NEW");
 
     assertThat(result).isNotNull();
     assertThat(result.getFirstName()).isEqualTo("Ivan");
     assertThat(result.getEmail()).isEqualTo("unique@example.com");
     assertThat(result.getPhone()).isEqualTo("+123456789");
-    assertThat(result.getCompany()).isEqualTo("Test Corp");
+    assertThat(result.getCompany()).isNull();
     assertThat(result.getStatus()).isEqualTo("NEW");
     assertThat(result.getId()).isNotNull();
 
@@ -71,8 +87,7 @@ class LeadServiceTest {
     existing.setEmail("duplicate@example.com");
     when(repository.findByEmailNative("duplicate@example.com")).thenReturn(Optional.of(existing));
 
-    assertThatThrownBy(() -> service.addLead("Ivan", "duplicate@example.com",
-            "111111", "First Corp", "NEW"))
+    assertThatThrownBy(() -> service.addLead("Ivan", "duplicate@example.com", "111111", "NEW"))
             .isInstanceOf(IllegalStateException.class)
             .hasMessageContaining("Lead with email already exists");
 
@@ -145,11 +160,13 @@ class LeadServiceTest {
     existing.setFirstName("John");
     existing.setCreatedAt(LocalDateTime.now());
 
+    Company newCompany = createCompany("NewCorp");
+
     Lead updatedLead = new Lead();
     updatedLead.setFirstName("Johnny");
     updatedLead.setEmail("john@update.com");
     updatedLead.setPhone("+111");
-    updatedLead.setCompany("NewCorp");
+    updatedLead.setCompany(newCompany);
     updatedLead.setStatus("QUALIFIED");
 
     when(repository.findById(id)).thenReturn(Optional.of(existing));
@@ -158,7 +175,8 @@ class LeadServiceTest {
     Lead result = service.update(id, updatedLead);
 
     assertThat(result.getFirstName()).isEqualTo("Johnny");
-    assertThat(result.getCompany()).isEqualTo("NewCorp");
+    assertThat(result.getCompany()).isNotNull();
+    assertThat(result.getCompany().getName()).isEqualTo("NewCorp");
     assertThat(result.getStatus()).isEqualTo("QUALIFIED");
     assertThat(result.getCreatedAt()).isEqualTo(existing.getCreatedAt());
 
@@ -217,8 +235,10 @@ class LeadServiceTest {
     return l;
   }
 
-  private Lead createLeadWithFields(String firstName, String email,
-                                    String status, LocalDateTime createdAt) {
+  private Lead createLeadWithFields(String firstName,
+                                    String email,
+                                    String status,
+                                    LocalDateTime createdAt) {
     Lead l = new Lead();
     l.setFirstName(firstName);
     l.setEmail(email);

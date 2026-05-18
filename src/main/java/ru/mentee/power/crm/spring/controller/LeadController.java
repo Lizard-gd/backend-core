@@ -18,16 +18,20 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.server.ResponseStatusException;
+import ru.mentee.power.crm.model.Company;
 import ru.mentee.power.crm.model.Lead;
+import ru.mentee.power.crm.repository.CompanyRepository;
 import ru.mentee.power.crm.service.LeadService;
 
 @Controller
 public class LeadController {
 
   private final LeadService leadService;
+  private CompanyRepository companyRepository;
 
-  public LeadController(LeadService leadService) {
+  public LeadController(LeadService leadService, CompanyRepository companyRepository) {
     this.leadService = leadService;
+    this.companyRepository = companyRepository;
   }
 
   @GetMapping("/leads/new")
@@ -36,24 +40,29 @@ public class LeadController {
     emptyLead.setStatus("NEW");
     emptyLead.setCreatedAt(LocalDateTime.now());
     model.addAttribute("lead", emptyLead);
+    model.addAttribute("companies", companyRepository.findAll());
     return "leads/create";
   }
 
   @PostMapping("/leads")
   public String createLead(@Valid @ModelAttribute("lead") Lead lead,
-                           BindingResult result, Model model) {
+                           BindingResult result,
+                           @RequestParam(required = false) UUID companyId,
+                           Model model) {
     if (result.hasErrors()) {
       model.addAttribute("lead", lead);
       model.addAttribute("errors", result);
+      model.addAttribute("companies", companyRepository.findAll());
       return "leads/create";
     }
     try {
       leadService.addLead(lead.getFirstName(), lead.getEmail(),
-              lead.getPhone(), lead.getCompany(), lead.getStatus());
+              lead.getPhone(), lead.getStatus(), companyId);
     } catch (IllegalStateException e) {
       result.rejectValue("email", "error.duplicate", "Лид с таким email уже существует");
       model.addAttribute("lead", lead);
       model.addAttribute("errors", result);
+      model.addAttribute("companies", companyRepository.findAll());
       return "leads/create";
     }
     return "redirect:/leads";
@@ -95,19 +104,35 @@ public class LeadController {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Lead not found with id: " + id);
     }
     model.addAttribute("lead", leadOpt.get());
+    model.addAttribute("companies", companyRepository.findAll());
     return "spring/edit";
   }
 
   @PostMapping("/leads/{id}")
-  public String updateLead(@PathVariable String id, @Valid @ModelAttribute("lead") Lead lead,
-                           BindingResult result, Model model) {
+  public String updateLead(@PathVariable String id,
+                           @Valid @ModelAttribute("lead") Lead lead,
+                           BindingResult result,
+                           @RequestParam(required = false) UUID companyId,
+                           Model model) {
     if (result.hasErrors()) {
       model.addAttribute("lead", lead);
       model.addAttribute("errors", result);
+      model.addAttribute("companies", companyRepository.findAll());
       return "spring/edit";
     }
     UUID uuid = UUID.fromString(id);
-    leadService.update(uuid, lead);
+    Lead existing = leadService.findById(uuid).orElseThrow();
+    existing.setFirstName(lead.getFirstName());
+    existing.setEmail(lead.getEmail());
+    existing.setPhone(lead.getPhone());
+    existing.setStatus(lead.getStatus());
+    if (companyId != null) {
+      Company company = companyRepository.findById(companyId).orElse(null);
+      existing.setCompany(company);
+    } else {
+      existing.setCompany(null);
+    }
+    leadService.update(uuid, existing);
     return "redirect:/leads";
   }
 

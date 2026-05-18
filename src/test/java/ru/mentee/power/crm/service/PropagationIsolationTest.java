@@ -12,7 +12,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
+import ru.mentee.power.crm.model.Company;
 import ru.mentee.power.crm.model.Lead;
+import ru.mentee.power.crm.repository.CompanyRepository;
 import ru.mentee.power.crm.repository.LeadRepository;
 
 @SpringBootTest
@@ -27,19 +29,29 @@ class PropagationIsolationTest {
   @Autowired
   private LeadRepository leadRepository;
 
+  @Autowired
+  private CompanyRepository companyRepository;
+
   private UUID testLeadId;
 
   @BeforeEach
   void setUp() {
     leadRepository.deleteAll();
+    companyRepository.deleteAll();
+
+    Company company = new Company();
+    company.setName("Propagation Corp");
+    company.setIndustry("Testing");
+    company = companyRepository.save(company);
+
     Lead lead = new Lead();
     lead.setFirstName("PropTest");
     lead.setEmail("prop@test.com");
     lead.setPhone("+500000000");
-    lead.setCompany("Propagation Corp");
+    lead.setCompany(company);
     lead.setStatus("INITIAL");
     lead.setCreatedAt(LocalDateTime.now());
-    leadRepository.save(lead);
+    lead = leadRepository.save(lead);
     testLeadId = lead.getId();
   }
 
@@ -72,7 +84,7 @@ class PropagationIsolationTest {
     leadRepository.save(lead);
 
     assertThatThrownBy(() -> childService.requiresNewMethod(testLeadId, true))
-        .isInstanceOf(RuntimeException.class);
+            .isInstanceOf(RuntimeException.class);
 
     Lead leadAfter = leadRepository.findById(testLeadId).orElseThrow();
     assertThat(leadAfter.getStatus()).isEqualTo("PARENT_CHANGE");
@@ -81,12 +93,11 @@ class PropagationIsolationTest {
   @Test
   void propagation_MANDATORY_requiresExistingTransaction() {
     assertThatThrownBy(() -> childService.mandatoryMethod(testLeadId))
-        .isInstanceOf(Exception.class);
+            .isInstanceOf(Exception.class);
   }
 
   @Test
   void isolation_READ_COMMITTED_allowsNonRepeatableRead() throws Exception {
-
     Lead lead = leadRepository.findById(testLeadId).orElseThrow();
     lead.setStatus("V1");
     leadRepository.save(lead);

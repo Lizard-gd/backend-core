@@ -21,6 +21,7 @@ import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import ru.mentee.power.crm.model.Lead;
+import ru.mentee.power.crm.repository.CompanyRepository;
 import ru.mentee.power.crm.repository.DealRepository;
 import ru.mentee.power.crm.repository.LeadRepository;
 
@@ -36,35 +37,37 @@ public class LeadServiceMockTest {
   @Mock
   private LeadProcessor mockLeadProcessor;
 
+  @Mock
+  private CompanyRepository mockCompanyRepository;
+
   private LeadService service;
 
   @BeforeEach
   void setUp() {
-    service = new LeadService(mockRepository, mockDealRepository, mockLeadProcessor);
+    service = new LeadService(mockRepository, mockDealRepository,
+            mockLeadProcessor, mockCompanyRepository);
   }
 
   @Test
   void shouldCallRepositorySave_whenAddingNewLead() {
     when(mockRepository.findByEmailNative(anyString())).thenReturn(Optional.empty());
 
+    // Используем перегрузку addLead без companyId
     Lead result = service.addLead("TestUser", "test@example.com",
-            "+123456789", "Test Corp", "NEW");
+            "+123456789", "NEW");
 
     verify(mockRepository, times(1)).save(any(Lead.class));
-    // Используем геттеры вместо record-методов
     assertThat(result.getEmail()).isEqualTo("test@example.com");
-    assertThat(result.getCompany()).isEqualTo("Test Corp");
+    assertThat(result.getCompany()).isNull();
   }
 
   @Test
   void shouldNotCallSave_whenEmailExists() {
-    // Создаём существующего лида через сеттеры
     Lead existingLead = new Lead();
     existingLead.setId(UUID.randomUUID());
     existingLead.setFirstName("Existing");
     existingLead.setEmail("existing@example.com");
     existingLead.setPhone("+777");
-    existingLead.setCompany("Company");
     existingLead.setStatus("NEW");
     existingLead.setCreatedAt(LocalDateTime.now());
 
@@ -73,7 +76,7 @@ public class LeadServiceMockTest {
 
     assertThatThrownBy(() ->
             service.addLead("Existing", "existing@example.com",
-                    "+888", "Other", "NEW")
+                    "+888", "NEW")
     ).isInstanceOf(IllegalStateException.class);
 
     verify(mockRepository, never()).save(any(Lead.class));
@@ -83,7 +86,7 @@ public class LeadServiceMockTest {
   void shouldCallFindByEmailBeforeSave() {
     when(mockRepository.findByEmailNative(anyString())).thenReturn(Optional.empty());
 
-    service.addLead("OrderUser", "order@example.com", "+999", "Order Corp", "NEW");
+    service.addLead("OrderUser", "order@example.com", "+999", "NEW");
 
     InOrder inOrder = inOrder(mockRepository);
     inOrder.verify(mockRepository).findByEmailNative("order@example.com");

@@ -12,13 +12,13 @@ public class MockLeadService extends LeadService {
   private final List<Lead> mockLeads;
 
   public MockLeadService() {
-    super(null, null, null);
+    super(null, null, null, null);
     Lead lead1 = new Lead();
     lead1.setId(UUID.randomUUID());
     lead1.setFirstName("Test Lead 1");
     lead1.setEmail("test1@example.com");
     lead1.setPhone("+1234567890");
-    lead1.setCompany("Test Corp1");
+    lead1.setCompany(null);
     lead1.setStatus("NEW");
     lead1.setCreatedAt(LocalDateTime.now());
 
@@ -27,7 +27,7 @@ public class MockLeadService extends LeadService {
     lead2.setFirstName("Test Lead 2");
     lead2.setEmail("test2@example.com");
     lead2.setPhone("+0987654321");
-    lead2.setCompany("Test Corp2");
+    lead2.setCompany(null);
     lead2.setStatus("NEW");
     lead2.setCreatedAt(LocalDateTime.now());
 
