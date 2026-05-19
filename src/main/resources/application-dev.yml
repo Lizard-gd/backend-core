@@ -7,7 +7,7 @@ spring:
 
   jpa:
     database: POSTGRESQL
-    defer-datasource-initialization: true
+    defer-datasource-initialization: false
     hibernate:
       ddl-auto: validate
     show-sql: true
@@ -17,8 +17,10 @@ spring:
         format_sql: true
 
   liquibase:
-    change-log: classpath:db/changelog/db.changelog-master.xml
+    change-log: classpath:db/changelog/db.changelog-master.yaml
     enabled: true
+    drop-first: false
+    default-schema: public
 
   sql:
     init:
@@ -28,3 +30,5 @@ logging:
   level:
     org.hibernate.SQL: DEBUG
     org.hibernate.orm.jdbc.bind: TRACE
+    liquibase: INFO
+    org.springframework.boot.autoconfigure.liquibase: DEBUG
