@@ -112,4 +112,20 @@ class PropagationIsolationTest {
     Lead afterB = leadRepository.findById(testLeadId).orElseThrow();
     assertThat(afterB.getStatus()).isEqualTo("V2");
   }
+
+  @Test
+  void parentMethodWithRequired_success() {
+    parentService.parentMethodWithRequired(testLeadId, false);
+    Lead lead = leadRepository.findById(testLeadId).orElseThrow();
+    assertThat(lead.getStatus()).isEqualTo("CHILD_REQUIRED");
+  }
+
+  @Test
+  void parentMethodWithRequiresNew_conflict() {
+    assertThatThrownBy(() -> parentService.parentMethodWithRequiresNew(testLeadId, false))
+            .isInstanceOf(org.springframework.orm.ObjectOptimisticLockingFailureException.class);
+
+    Lead lead = leadRepository.findById(testLeadId).orElseThrow();
+    assertThat(lead.getStatus()).isEqualTo("CHILD_REQUIRES_NEW");
+  }
 }
