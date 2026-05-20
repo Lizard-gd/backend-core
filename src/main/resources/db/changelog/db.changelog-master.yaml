@@ -11,3 +11,6 @@ databaseChangeLog:
   - include:
       file: migrations/004_create_products.sql
       relativeToChangelogFile: true
+  - include:
+      file: migrations/005_create_deal_product.sql
+      relativeToChangelogFile: true
