@@ -229,4 +229,29 @@ class LeadRepositoryTest {
     assertThat(page.getContent()).hasSize(2);
     assertThat(page.getTotalElements()).isEqualTo(2);
   }
+
+  @Test
+  void shouldFindLeadByEmailIgnoreCase_whenEmailExistsWithDifferentCase() {
+    Lead leadMixedCase = new Lead();
+    leadMixedCase.setFirstName("CaseTest");
+    leadMixedCase.setEmail("Test@Example.COM");
+    leadMixedCase.setPhone("+77777777777");
+    leadMixedCase.setCompany(companyTinkoff);
+    leadMixedCase.setStatus("NEW");
+    leadMixedCase.setCreatedAt(LocalDateTime.now());
+    leadRepository.save(leadMixedCase);
+
+    Optional<Lead> found = leadRepository.findByEmailIgnoreCase("test@example.com");
+
+    assertThat(found).isPresent();
+    assertThat(found.get().getEmail()).isEqualTo("Test@Example.COM");
+    assertThat(found.get().getFirstName()).isEqualTo("CaseTest");
+  }
+
+  @Test
+  void shouldReturnEmptyOptional_whenEmailDoesNotExist() {
+    Optional<Lead> found = leadRepository.findByEmailIgnoreCase("nonexistent@example.com");
+
+    assertThat(found).isEmpty();
+  }
 }
