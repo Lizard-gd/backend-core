@@ -73,4 +73,6 @@ public interface LeadRepository extends JpaRepository<Lead, UUID> {
   @Query("SELECT l FROM Lead l WHERE l.status = :status AND l.company.id = :companyId")
   List<Lead> findByStatusAndCompanyId(@Param("status") String status,
                                       @Param("companyId") UUID companyId);
+
+  Optional<Lead> findByEmailIgnoreCase(String email);
 }
