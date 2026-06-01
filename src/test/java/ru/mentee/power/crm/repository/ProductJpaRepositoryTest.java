@@ -6,7 +6,6 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
-
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
@@ -18,8 +17,7 @@ import ru.mentee.power.crm.model.Product;
 @ActiveProfiles("test")
 class ProductJpaRepositoryTest {
 
-  @Autowired
-  private ProductJpaRepository productRepository;
+  @Autowired private ProductJpaRepository productRepository;
 
   @Test
   void shouldSaveAndFindProduct_whenValidData() {
@@ -75,8 +73,9 @@ class ProductJpaRepositoryTest {
 
     List<Product> activeProducts = productRepository.findByActiveTrue();
     assertThat(activeProducts).hasSize(2);
-    assertThat(activeProducts).extracting(Product::getSku)
-                .containsExactlyInAnyOrder("ACT1", "ACT2");
+    assertThat(activeProducts)
+        .extracting(Product::getSku)
+        .containsExactlyInAnyOrder("ACT1", "ACT2");
   }
 
   @Test
@@ -92,9 +91,11 @@ class ProductJpaRepositoryTest {
     product2.setSku("DUPLICATE");
     product2.setPrice(new BigDecimal("200"));
 
-    assertThatThrownBy(() -> {
-      productRepository.save(product2);
-      productRepository.flush();
-    }).isInstanceOf(DataIntegrityViolationException.class);
+    assertThatThrownBy(
+            () -> {
+              productRepository.save(product2);
+              productRepository.flush();
+            })
+        .isInstanceOf(DataIntegrityViolationException.class);
   }
 }

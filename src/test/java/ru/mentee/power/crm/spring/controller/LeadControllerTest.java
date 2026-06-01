@@ -14,7 +14,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.util.Collections;
 import java.util.Optional;
 import java.util.UUID;
-
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -37,42 +36,34 @@ import tools.jackson.databind.ObjectMapper;
 @ActiveProfiles("test")
 class LeadControllerTest {
 
-  @Autowired
-  private MockMvc mockMvc;
+  @Autowired private MockMvc mockMvc;
 
-  @MockitoBean
-  private LeadService leadService;
+  @MockitoBean private LeadService leadService;
 
-  @MockitoBean
-  private DealService dealService;
+  @MockitoBean private DealService dealService;
 
-  @MockitoBean
-  private CompanyRepository companyRepository;
+  @MockitoBean private CompanyRepository companyRepository;
 
-  @MockitoBean
-  private LeadRepository leadRepository;
+  @MockitoBean private LeadRepository leadRepository;
 
-  @MockitoBean
-  private ChildService childService;
+  @MockitoBean private ChildService childService;
 
-  @MockitoBean
-  private LeadProcessor leadProcessor;
+  @MockitoBean private LeadProcessor leadProcessor;
 
-  @MockitoBean
-  private ParentService parentService;
+  @MockitoBean private ParentService parentService;
 
-  @Autowired
-  private ObjectMapper objectMapper;
+  @Autowired private ObjectMapper objectMapper;
 
   @Test
   void shouldShowCreateForm() throws Exception {
     when(companyRepository.findAll()).thenReturn(Collections.emptyList());
 
-    mockMvc.perform(get("/leads/new"))
-            .andExpect(status().isOk())
-            .andExpect(view().name("leads/create"))
-            .andExpect(model().attributeExists("lead"))
-            .andExpect(model().attributeExists("companies"));
+    mockMvc
+        .perform(get("/leads/new"))
+        .andExpect(status().isOk())
+        .andExpect(view().name("leads/create"))
+        .andExpect(model().attributeExists("lead"))
+        .andExpect(model().attributeExists("companies"));
   }
 
   @Test
@@ -80,96 +71,107 @@ class LeadControllerTest {
     when(leadService.addLead(any(), any(), any(), any(), any())).thenReturn(new Lead());
     when(companyRepository.findAll()).thenReturn(Collections.emptyList());
 
-    mockMvc.perform(post("/leads")
-                    .param("firstName", "John")
-                    .param("email", "john@example.com")
-                    .param("phone", "+123456789")
-                    .param("status", "NEW"))
-            .andExpect(status().is3xxRedirection())
-            .andExpect(redirectedUrl("/leads"));
+    mockMvc
+        .perform(
+            post("/leads")
+                .param("firstName", "John")
+                .param("email", "john@example.com")
+                .param("phone", "+123456789")
+                .param("status", "NEW"))
+        .andExpect(status().is3xxRedirection())
+        .andExpect(redirectedUrl("/leads"));
   }
 
   @Test
   void shouldReturnCreateFormWithError_whenFirstNameIsBlank() throws Exception {
     when(companyRepository.findAll()).thenReturn(Collections.emptyList());
 
-    mockMvc.perform(post("/leads")
-                    .param("firstName", "")
-                    .param("email", "john@example.com")
-                    .param("phone", "+123456789")
-                    .param("status", "NEW"))
-            .andExpect(status().isOk())
-            .andExpect(view().name("leads/create"))
-            .andExpect(model().attributeHasFieldErrors("lead", "firstName"));
+    mockMvc
+        .perform(
+            post("/leads")
+                .param("firstName", "")
+                .param("email", "john@example.com")
+                .param("phone", "+123456789")
+                .param("status", "NEW"))
+        .andExpect(status().isOk())
+        .andExpect(view().name("leads/create"))
+        .andExpect(model().attributeHasFieldErrors("lead", "firstName"));
   }
 
   @Test
   void shouldReturnCreateFormWithError_whenEmailIsInvalid() throws Exception {
     when(companyRepository.findAll()).thenReturn(Collections.emptyList());
 
-    mockMvc.perform(post("/leads")
-                    .param("firstName", "John")
-                    .param("email", "invalid-email")
-                    .param("phone", "+123456789")
-                    .param("status", "NEW"))
-            .andExpect(status().isOk())
-            .andExpect(view().name("leads/create"))
-            .andExpect(model().attributeHasFieldErrors("lead", "email"));
+    mockMvc
+        .perform(
+            post("/leads")
+                .param("firstName", "John")
+                .param("email", "invalid-email")
+                .param("phone", "+123456789")
+                .param("status", "NEW"))
+        .andExpect(status().isOk())
+        .andExpect(view().name("leads/create"))
+        .andExpect(model().attributeHasFieldErrors("lead", "email"));
   }
 
   @Test
   void shouldReturnCreateFormWithError_whenEmailMissingDomain() throws Exception {
     when(companyRepository.findAll()).thenReturn(Collections.emptyList());
 
-    mockMvc.perform(post("/leads")
-                    .param("firstName", "John")
-                    .param("email", "john@example")
-                    .param("phone", "+123456789")
-                    .param("status", "NEW"))
-            .andExpect(status().isOk())
-            .andExpect(view().name("leads/create"))
-            .andExpect(model().attributeHasFieldErrors("lead", "email"));
+    mockMvc
+        .perform(
+            post("/leads")
+                .param("firstName", "John")
+                .param("email", "john@example")
+                .param("phone", "+123456789")
+                .param("status", "NEW"))
+        .andExpect(status().isOk())
+        .andExpect(view().name("leads/create"))
+        .andExpect(model().attributeHasFieldErrors("lead", "email"));
   }
 
   @Test
   void shouldReturnCreateFormWithError_whenPhoneHasNoPlus() throws Exception {
     when(companyRepository.findAll()).thenReturn(Collections.emptyList());
 
-    mockMvc.perform(post("/leads")
-                    .param("firstName", "John")
-                    .param("email", "john@example.com")
-                    .param("phone", "123456789")
-                    .param("status", "NEW"))
-            .andExpect(status().isOk())
-            .andExpect(view().name("leads/create"))
-            .andExpect(model().attributeHasFieldErrors("lead", "phone"));
+    mockMvc
+        .perform(
+            post("/leads")
+                .param("firstName", "John")
+                .param("email", "john@example.com")
+                .param("phone", "123456789")
+                .param("status", "NEW"))
+        .andExpect(status().isOk())
+        .andExpect(view().name("leads/create"))
+        .andExpect(model().attributeHasFieldErrors("lead", "phone"));
   }
 
   @Test
   void shouldShowAllLeadsWhenNoStatus() throws Exception {
     when(leadService.findLeads(null, null, null, null)).thenReturn(Collections.emptyList());
 
-    mockMvc.perform(get("/leads"))
-            .andExpect(status().isOk())
-            .andExpect(view().name("leads/list"))
-            .andExpect(model().attributeExists("leads"));
+    mockMvc
+        .perform(get("/leads"))
+        .andExpect(status().isOk())
+        .andExpect(view().name("leads/list"))
+        .andExpect(model().attributeExists("leads"));
   }
 
   @Test
   void shouldShowLeadsWithStatusFilter() throws Exception {
     when(leadService.findLeads(null, "NEW", null, null)).thenReturn(Collections.emptyList());
 
-    mockMvc.perform(get("/leads").param("status", "NEW"))
-            .andExpect(status().isOk())
-            .andExpect(view().name("leads/list"));
+    mockMvc
+        .perform(get("/leads").param("status", "NEW"))
+        .andExpect(status().isOk())
+        .andExpect(view().name("leads/list"));
   }
 
   @Test
   void shouldCallFindLeadsWithOnlySearch_whenOnlySearchProvided() throws Exception {
     when(leadService.findLeads("john", null, null, null)).thenReturn(Collections.emptyList());
 
-    mockMvc.perform(get("/leads").param("search", "john"))
-            .andExpect(status().isOk());
+    mockMvc.perform(get("/leads").param("search", "john")).andExpect(status().isOk());
     verify(leadService).findLeads("john", null, null, null);
   }
 
@@ -177,8 +179,9 @@ class LeadControllerTest {
   void shouldCallFindLeadsWithSearchAndStatus_whenBothParamsProvided() throws Exception {
     when(leadService.findLeads("john", "NEW", null, null)).thenReturn(Collections.emptyList());
 
-    mockMvc.perform(get("/leads").param("search", "john").param("status", "NEW"))
-            .andExpect(status().isOk());
+    mockMvc
+        .perform(get("/leads").param("search", "john").param("status", "NEW"))
+        .andExpect(status().isOk());
     verify(leadService).findLeads("john", "NEW", null, null);
   }
 
@@ -186,8 +189,7 @@ class LeadControllerTest {
   void shouldCallFindLeadsWithNullParams_whenNoParams() throws Exception {
     when(leadService.findLeads(null, null, null, null)).thenReturn(Collections.emptyList());
 
-    mockMvc.perform(get("/leads"))
-            .andExpect(status().isOk());
+    mockMvc.perform(get("/leads")).andExpect(status().isOk());
     verify(leadService).findLeads(null, null, null, null);
   }
 
@@ -204,14 +206,16 @@ class LeadControllerTest {
     when(leadService.findById(leadId)).thenReturn(Optional.of(existingLead));
     when(companyRepository.findAll()).thenReturn(Collections.emptyList());
 
-    mockMvc.perform(post("/leads/" + leadId)
-                    .param("firstName", "")
-                    .param("email", "john@example.com")
-                    .param("phone", "+123456789")
-                    .param("status", "NEW"))
-            .andExpect(status().isOk())
-            .andExpect(view().name("spring/edit"))
-            .andExpect(model().attributeHasFieldErrors("lead", "firstName"));
+    mockMvc
+        .perform(
+            post("/leads/" + leadId)
+                .param("firstName", "")
+                .param("email", "john@example.com")
+                .param("phone", "+123456789")
+                .param("status", "NEW"))
+        .andExpect(status().isOk())
+        .andExpect(view().name("spring/edit"))
+        .andExpect(model().attributeHasFieldErrors("lead", "firstName"));
   }
 
   @Test
@@ -228,13 +232,15 @@ class LeadControllerTest {
     when(leadService.update(eq(leadId), any(Lead.class))).thenReturn(existingLead);
     when(companyRepository.findAll()).thenReturn(Collections.emptyList());
 
-    mockMvc.perform(post("/leads/" + leadId)
-                    .param("firstName", "Updated")
-                    .param("email", "updated@example.com")
-                    .param("phone", "+987654321")
-                    .param("status", "QUALIFIED"))
-            .andExpect(status().is3xxRedirection())
-            .andExpect(redirectedUrl("/leads"));
+    mockMvc
+        .perform(
+            post("/leads/" + leadId)
+                .param("firstName", "Updated")
+                .param("email", "updated@example.com")
+                .param("phone", "+987654321")
+                .param("status", "QUALIFIED"))
+        .andExpect(status().is3xxRedirection())
+        .andExpect(redirectedUrl("/leads"));
   }
 
   @Test
@@ -242,12 +248,14 @@ class LeadControllerTest {
     when(leadService.addLead(any(), any(), any(), any(), any())).thenReturn(new Lead());
     when(companyRepository.findAll()).thenReturn(Collections.emptyList());
 
-    mockMvc.perform(post("/leads")
-                    .param("firstName", "John")
-                    .param("email", "john@example.com")
-                    .param("phone", "+123456789")
-                    .param("status", "NEW"))
-            .andExpect(status().is3xxRedirection())
-            .andExpect(redirectedUrl("/leads"));
+    mockMvc
+        .perform(
+            post("/leads")
+                .param("firstName", "John")
+                .param("email", "john@example.com")
+                .param("phone", "+123456789")
+                .param("status", "NEW"))
+        .andExpect(status().is3xxRedirection())
+        .andExpect(redirectedUrl("/leads"));
   }
 }

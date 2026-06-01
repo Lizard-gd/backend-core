@@ -13,7 +13,6 @@ import static org.mockito.Mockito.when;
 import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.UUID;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -28,24 +27,21 @@ import ru.mentee.power.crm.repository.LeadRepository;
 @ExtendWith(MockitoExtension.class)
 public class LeadServiceMockTest {
 
-  @Mock
-  private LeadRepository mockRepository;
+  @Mock private LeadRepository mockRepository;
 
-  @Mock
-  private DealRepository mockDealRepository;
+  @Mock private DealRepository mockDealRepository;
 
-  @Mock
-  private LeadProcessor mockLeadProcessor;
+  @Mock private LeadProcessor mockLeadProcessor;
 
-  @Mock
-  private CompanyRepository mockCompanyRepository;
+  @Mock private CompanyRepository mockCompanyRepository;
 
   private LeadService service;
 
   @BeforeEach
   void setUp() {
-    service = new LeadService(mockRepository, mockDealRepository,
-            mockLeadProcessor, mockCompanyRepository);
+    service =
+        new LeadService(
+            mockRepository, mockDealRepository, mockLeadProcessor, mockCompanyRepository);
   }
 
   @Test
@@ -53,8 +49,7 @@ public class LeadServiceMockTest {
     when(mockRepository.findByEmailNative(anyString())).thenReturn(Optional.empty());
 
     // Используем перегрузку addLead без companyId
-    Lead result = service.addLead("TestUser", "test@example.com",
-            "+123456789", "NEW");
+    Lead result = service.addLead("TestUser", "test@example.com", "+123456789", "NEW");
 
     verify(mockRepository, times(1)).save(any(Lead.class));
     assertThat(result.getEmail()).isEqualTo("test@example.com");
@@ -72,12 +67,10 @@ public class LeadServiceMockTest {
     existingLead.setCreatedAt(LocalDateTime.now());
 
     when(mockRepository.findByEmailNative("existing@example.com"))
-            .thenReturn(Optional.of(existingLead));
+        .thenReturn(Optional.of(existingLead));
 
-    assertThatThrownBy(() ->
-            service.addLead("Existing", "existing@example.com",
-                    "+888", "NEW")
-    ).isInstanceOf(IllegalStateException.class);
+    assertThatThrownBy(() -> service.addLead("Existing", "existing@example.com", "+888", "NEW"))
+        .isInstanceOf(IllegalStateException.class);
 
     verify(mockRepository, never()).save(any(Lead.class));
   }

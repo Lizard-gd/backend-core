@@ -6,7 +6,6 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import java.time.LocalDateTime;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,17 +19,13 @@ import ru.mentee.power.crm.repository.LeadRepository;
 @SpringBootTest
 class PropagationIsolationTest {
 
-  @Autowired
-  private ParentService parentService;
+  @Autowired private ParentService parentService;
 
-  @Autowired
-  private ChildService childService;
+  @Autowired private ChildService childService;
 
-  @Autowired
-  private LeadRepository leadRepository;
+  @Autowired private LeadRepository leadRepository;
 
-  @Autowired
-  private CompanyRepository companyRepository;
+  @Autowired private CompanyRepository companyRepository;
 
   private UUID testLeadId;
 
@@ -58,7 +53,7 @@ class PropagationIsolationTest {
   @Test
   void propagation_REQUIRED_shouldReuseTransaction() {
     assertThatThrownBy(() -> parentService.parentMethodWithRequired(testLeadId, true))
-            .isInstanceOf(RuntimeException.class);
+        .isInstanceOf(RuntimeException.class);
 
     Lead lead = leadRepository.findById(testLeadId).orElseThrow();
     assertThat(lead.getStatus()).isEqualTo("INITIAL");
@@ -84,7 +79,7 @@ class PropagationIsolationTest {
     leadRepository.save(lead);
 
     assertThatThrownBy(() -> childService.requiresNewMethod(testLeadId, true))
-            .isInstanceOf(RuntimeException.class);
+        .isInstanceOf(RuntimeException.class);
 
     Lead leadAfter = leadRepository.findById(testLeadId).orElseThrow();
     assertThat(leadAfter.getStatus()).isEqualTo("PARENT_CHANGE");
@@ -93,7 +88,7 @@ class PropagationIsolationTest {
   @Test
   void propagation_MANDATORY_requiresExistingTransaction() {
     assertThatThrownBy(() -> childService.mandatoryMethod(testLeadId))
-            .isInstanceOf(Exception.class);
+        .isInstanceOf(Exception.class);
   }
 
   @Test
@@ -102,11 +97,13 @@ class PropagationIsolationTest {
     lead.setStatus("V1");
     leadRepository.save(lead);
 
-    CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
-      Lead l = leadRepository.findById(testLeadId).orElseThrow();
-      l.setStatus("V2");
-      leadRepository.save(l);
-    });
+    CompletableFuture<Void> future =
+        CompletableFuture.runAsync(
+            () -> {
+              Lead l = leadRepository.findById(testLeadId).orElseThrow();
+              l.setStatus("V2");
+              leadRepository.save(l);
+            });
     future.join();
 
     Lead afterB = leadRepository.findById(testLeadId).orElseThrow();
@@ -123,7 +120,7 @@ class PropagationIsolationTest {
   @Test
   void parentMethodWithRequiresNew_conflict() {
     assertThatThrownBy(() -> parentService.parentMethodWithRequiresNew(testLeadId, false))
-            .isInstanceOf(org.springframework.orm.ObjectOptimisticLockingFailureException.class);
+        .isInstanceOf(org.springframework.orm.ObjectOptimisticLockingFailureException.class);
 
     Lead lead = leadRepository.findById(testLeadId).orElseThrow();
     assertThat(lead.getStatus()).isEqualTo("CHILD_REQUIRES_NEW");

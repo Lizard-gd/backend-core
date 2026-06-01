@@ -2,7 +2,6 @@ package ru.mentee.power.crm.spring.controller;
 
 import java.math.BigDecimal;
 import java.util.UUID;
-
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -43,12 +42,13 @@ public class DealController {
   @GetMapping("/convert/{leadId}")
   public String showConvertForm(@PathVariable String leadId, Model model) {
     UUID uuid = UUID.fromString(leadId);
-    Lead lead = leadService.findById(uuid)
-              .orElseThrow(() -> new IllegalArgumentException("Lead not found: " + leadId));
+    Lead lead =
+        leadService
+            .findById(uuid)
+            .orElseThrow(() -> new IllegalArgumentException("Lead not found: " + leadId));
     if (!"QUALIFIED".equals(lead.getStatus())) {
-      throw new IllegalStateException("Only QUALIFIED leads "
-              + "can be converted to deals. Lead status: "
-                  + lead.getStatus());
+      throw new IllegalStateException(
+          "Only QUALIFIED leads " + "can be converted to deals. Lead status: " + lead.getStatus());
     }
     model.addAttribute("lead", lead);
     return "deals/convert";
@@ -61,9 +61,10 @@ public class DealController {
   }
 
   @PostMapping("/{id}/transition")
-  public String transitionStatus(@PathVariable String id,
-                                 @RequestParam DealStatus newStatus,
-                                 RedirectAttributes redirectAttributes) {
+  public String transitionStatus(
+      @PathVariable String id,
+      @RequestParam DealStatus newStatus,
+      RedirectAttributes redirectAttributes) {
     try {
       dealService.transitionDealStatus(id, newStatus);
     } catch (IllegalStateException e) {

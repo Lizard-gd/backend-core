@@ -11,13 +11,12 @@ public class FieldInjectionProblemTest {
   void filedInjectionShowsNullWithoutSpring() {
     DemoController controller = new DemoController(null);
 
-    assertThatCode(() -> controller.demo())
-                .doesNotThrowAnyException();
+    assertThatCode(() -> controller.demo()).doesNotThrowAnyException();
 
     String result = controller.demo();
     assertThat(result)
-                .contains("Constructor Injection (final): ✗ NULL")
-                .contains("Filed Injection (@Autowired filed): ✗ NULL")
-                .contains("Setter Injection (@Autowired setter): ✗ NULL");
+        .contains("Constructor Injection (final): ✗ NULL")
+        .contains("Filed Injection (@Autowired filed): ✗ NULL")
+        .contains("Setter Injection (@Autowired setter): ✗ NULL");
   }
 }

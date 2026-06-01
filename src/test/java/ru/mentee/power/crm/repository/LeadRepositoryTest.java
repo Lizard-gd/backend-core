@@ -6,7 +6,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,11 +18,9 @@ import ru.mentee.power.crm.model.Lead;
 @DataJpaTest
 class LeadRepositoryTest {
 
-  @Autowired
-  private LeadRepository leadRepository;
+  @Autowired private LeadRepository leadRepository;
 
-  @Autowired
-  private CompanyRepository companyRepository;
+  @Autowired private CompanyRepository companyRepository;
 
   private Lead lead1;
   private Lead lead2;
@@ -133,8 +130,9 @@ class LeadRepositoryTest {
     List<Lead> leads = leadRepository.findByCompanyId(companyTinkoff.getId());
 
     assertThat(leads).hasSize(2);
-    assertThat(leads).extracting(Lead::getEmail)
-            .containsExactlyInAnyOrder("john@example.com", "jane@example.com");
+    assertThat(leads)
+        .extracting(Lead::getEmail)
+        .containsExactlyInAnyOrder("john@example.com", "jane@example.com");
   }
 
   @Test
@@ -224,8 +222,8 @@ class LeadRepositoryTest {
 
   @Test
   void findByStatusInPaged_shouldReturnPage() {
-    Page<Lead> page = leadRepository.findByStatusInPaged(List.of("NEW", "CONTACTED"),
-            PageRequest.of(0, 10));
+    Page<Lead> page =
+        leadRepository.findByStatusInPaged(List.of("NEW", "CONTACTED"), PageRequest.of(0, 10));
     assertThat(page.getContent()).hasSize(2);
     assertThat(page.getTotalElements()).isEqualTo(2);
   }

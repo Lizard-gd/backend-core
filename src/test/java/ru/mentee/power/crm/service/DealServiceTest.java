@@ -11,7 +11,6 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.UUID;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -27,11 +26,9 @@ import ru.mentee.power.crm.repository.LeadRepository;
 @ExtendWith(MockitoExtension.class)
 class DealServiceTest {
 
-  @Mock
-  private DealRepository dealRepository;
+  @Mock private DealRepository dealRepository;
 
-  @Mock
-  private LeadRepository leadRepository;
+  @Mock private LeadRepository leadRepository;
 
   private DealService dealService;
 
@@ -78,8 +75,8 @@ class DealServiceTest {
     when(leadRepository.findById(any(UUID.class))).thenReturn(Optional.empty());
 
     assertThatThrownBy(() -> dealService.convertLeadToDeal(leadId, BigDecimal.TEN))
-            .isInstanceOf(IllegalArgumentException.class)
-            .hasMessageContaining("Lead not found");
+        .isInstanceOf(IllegalArgumentException.class)
+        .hasMessageContaining("Lead not found");
 
     verify(dealRepository, never()).save(any());
   }
@@ -95,8 +92,8 @@ class DealServiceTest {
     when(leadRepository.findById(leadUuid)).thenReturn(Optional.of(nonQualifiedLead));
 
     assertThatThrownBy(() -> dealService.convertLeadToDeal(leadIdStr, new BigDecimal("5000")))
-            .isInstanceOf(IllegalStateException.class)
-            .hasMessageContaining("Only QUALIFIED leads");
+        .isInstanceOf(IllegalStateException.class)
+        .hasMessageContaining("Only QUALIFIED leads");
 
     verify(dealRepository, never()).save(any());
   }
@@ -104,8 +101,8 @@ class DealServiceTest {
   @Test
   void transitionDealStatus_shouldUpdateStatus_whenValidTransition() {
     String dealId = "deal-123";
-    Deal deal = new Deal(dealId, "lead-1",
-            BigDecimal.valueOf(1000), DealStatus.NEW, LocalDateTime.now());
+    Deal deal =
+        new Deal(dealId, "lead-1", BigDecimal.valueOf(1000), DealStatus.NEW, LocalDateTime.now());
     when(dealRepository.findById(dealId)).thenReturn(Optional.of(deal));
 
     Deal updated = dealService.transitionDealStatus(dealId, DealStatus.QUALIFIED);
@@ -117,13 +114,13 @@ class DealServiceTest {
   @Test
   void transitionDealStatus_shouldThrowException_whenTransitionInvalid() {
     String dealId = "deal-456";
-    Deal deal = new Deal(dealId, "lead-2",
-            BigDecimal.valueOf(2000), DealStatus.WON, LocalDateTime.now());
+    Deal deal =
+        new Deal(dealId, "lead-2", BigDecimal.valueOf(2000), DealStatus.WON, LocalDateTime.now());
     when(dealRepository.findById(dealId)).thenReturn(Optional.of(deal));
 
     assertThatThrownBy(() -> dealService.transitionDealStatus(dealId, DealStatus.NEW))
-            .isInstanceOf(IllegalStateException.class)
-            .hasMessageContaining("Cannot transition from WON to NEW");
+        .isInstanceOf(IllegalStateException.class)
+        .hasMessageContaining("Cannot transition from WON to NEW");
 
     verify(dealRepository, never()).save(any());
   }
@@ -134,7 +131,7 @@ class DealServiceTest {
     when(dealRepository.findById(nonExistentId)).thenReturn(Optional.empty());
 
     assertThatThrownBy(() -> dealService.transitionDealStatus(nonExistentId, DealStatus.QUALIFIED))
-            .isInstanceOf(IllegalArgumentException.class)
-            .hasMessageContaining("Deal not found");
+        .isInstanceOf(IllegalArgumentException.class)
+        .hasMessageContaining("Deal not found");
   }
 }

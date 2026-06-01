@@ -6,7 +6,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
-
 import org.springframework.stereotype.Repository;
 import ru.mentee.power.crm.model.Deal;
 import ru.mentee.power.crm.model.DealStatus;
@@ -33,8 +32,8 @@ public class InMemoryDealRepository implements DealRepository {
   @Override
   public List<Deal> findByStatus(DealStatus status) {
     return storage.values().stream()
-            .filter(deal -> deal.getStatus() == status)
-            .collect(Collectors.toList());
+        .filter(deal -> deal.getStatus() == status)
+        .collect(Collectors.toList());
   }
 
   @Override

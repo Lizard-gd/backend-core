@@ -8,7 +8,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,17 +26,13 @@ import ru.mentee.power.crm.repository.LeadRepository;
 @Transactional
 class LeadServiceIntegrationTest {
 
-  @Autowired
-  private LeadService leadService;
+  @Autowired private LeadService leadService;
 
-  @Autowired
-  private LeadRepository leadRepository;
+  @Autowired private LeadRepository leadRepository;
 
-  @Autowired
-  private DealRepository dealRepository;
+  @Autowired private DealRepository dealRepository;
 
-  @Autowired
-  private CompanyRepository companyRepository;
+  @Autowired private CompanyRepository companyRepository;
 
   private Company testCompany;
   private Company qualifiedCorp;
@@ -156,12 +151,13 @@ class LeadServiceIntegrationTest {
     invalidRequest.setAmount(null);
 
     assertThatThrownBy(() -> leadService.convertLeadToDeal(lead.getId(), invalidRequest))
-            .isInstanceOf(Exception.class);
+        .isInstanceOf(Exception.class);
 
     Lead unchangedLead = leadRepository.findById(lead.getId()).orElseThrow();
     assertThat(unchangedLead.getStatus()).isEqualTo("QUALIFIED");
 
-    boolean dealExists = dealRepository.findAll().stream()
+    boolean dealExists =
+        dealRepository.findAll().stream()
             .anyMatch(d -> d.getLeadId().equals(lead.getId().toString()));
     assertThat(dealExists).isFalse();
   }
@@ -242,8 +238,8 @@ class LeadServiceIntegrationTest {
     request.setAmount(new BigDecimal("5000"));
 
     assertThatThrownBy(() -> leadService.convertLeadToDeal(lead.getId(), request))
-            .isInstanceOf(IllegalStateException.class)
-            .hasMessageContaining("cannot be converted");
+        .isInstanceOf(IllegalStateException.class)
+        .hasMessageContaining("cannot be converted");
   }
 
   private Lead createLeadWithStatus(String status) {

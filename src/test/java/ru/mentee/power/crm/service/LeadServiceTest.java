@@ -13,7 +13,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -31,20 +30,15 @@ import ru.mentee.power.crm.repository.LeadRepository;
 @ExtendWith(MockitoExtension.class)
 class LeadServiceTest {
 
-  @Mock
-  private LeadRepository repository;
+  @Mock private LeadRepository repository;
 
-  @Mock
-  private DealRepository dealRepository;
+  @Mock private DealRepository dealRepository;
 
-  @Mock
-  private LeadProcessor leadProcessor;
+  @Mock private LeadProcessor leadProcessor;
 
-  @Mock
-  private CompanyRepository companyRepository;
+  @Mock private CompanyRepository companyRepository;
 
-  @InjectMocks
-  private LeadService service;
+  @InjectMocks private LeadService service;
 
   private Company createCompany(String name) {
     Company company = new Company();
@@ -56,13 +50,15 @@ class LeadServiceTest {
   @Test
   void shouldCreateLead_whenEmailIsUnique() {
     when(repository.findByEmailNative(anyString())).thenReturn(Optional.empty());
-    when(repository.save(any(Lead.class))).thenAnswer(invocation -> {
-      Lead lead = invocation.getArgument(0);
-      if (lead.getId() == null) {
-        lead.setId(UUID.randomUUID());
-      }
-      return lead;
-    });
+    when(repository.save(any(Lead.class)))
+        .thenAnswer(
+            invocation -> {
+              Lead lead = invocation.getArgument(0);
+              if (lead.getId() == null) {
+                lead.setId(UUID.randomUUID());
+              }
+              return lead;
+            });
 
     Lead result = service.addLead("Ivan", "unique@example.com", "+123456789", "NEW");
 
@@ -88,8 +84,8 @@ class LeadServiceTest {
     when(repository.findByEmailNative("duplicate@example.com")).thenReturn(Optional.of(existing));
 
     assertThatThrownBy(() -> service.addLead("Ivan", "duplicate@example.com", "111111", "NEW"))
-            .isInstanceOf(IllegalStateException.class)
-            .hasMessageContaining("Lead with email already exists");
+        .isInstanceOf(IllegalStateException.class)
+        .hasMessageContaining("Lead with email already exists");
 
     verify(repository, never()).save(any());
   }
@@ -143,10 +139,8 @@ class LeadServiceTest {
 
   @Test
   void shouldReturnOnlyNewLeads_whenFindByStatusNew() {
-    when(repository.findByStatusNative("NEW")).thenReturn(List.of(
-            createLeadWithStatus("NEW"),
-            createLeadWithStatus("NEW")
-    ));
+    when(repository.findByStatusNative("NEW"))
+        .thenReturn(List.of(createLeadWithStatus("NEW"), createLeadWithStatus("NEW")));
     List<Lead> result = service.findByStatus("NEW");
     assertThat(result).hasSize(2);
     assertThat(result).allMatch(lead -> lead.getStatus().equals("NEW"));
@@ -190,8 +184,8 @@ class LeadServiceTest {
 
     Lead dummy = new Lead();
     assertThatThrownBy(() -> service.update(id, dummy))
-            .isInstanceOf(IllegalArgumentException.class)
-            .hasMessageContaining("Lead not found with id: " + id);
+        .isInstanceOf(IllegalArgumentException.class)
+        .hasMessageContaining("Lead not found with id: " + id);
   }
 
   @Test
@@ -212,15 +206,15 @@ class LeadServiceTest {
     when(repository.findById(id)).thenReturn(Optional.empty());
 
     assertThatThrownBy(() -> service.delete(id))
-            .isInstanceOf(ResponseStatusException.class)
-            .extracting(ex -> ((ResponseStatusException) ex).getStatusCode())
-            .isEqualTo(HttpStatus.NOT_FOUND);
+        .isInstanceOf(ResponseStatusException.class)
+        .extracting(ex -> ((ResponseStatusException) ex).getStatusCode())
+        .isEqualTo(HttpStatus.NOT_FOUND);
   }
 
   @Test
   void findLeads_ShouldFilterBySearchAndStatusAndDate() {
-    Lead lead1 = createLeadWithFields("Alice", "alice@test.com",
-            "NEW", LocalDateTime.now().minusDays(1));
+    Lead lead1 =
+        createLeadWithFields("Alice", "alice@test.com", "NEW", LocalDateTime.now().minusDays(1));
     Lead lead2 = createLeadWithFields("Bob", "bob@test.com", "QUALIFIED", LocalDateTime.now());
     when(repository.findAll()).thenReturn(List.of(lead1, lead2));
 
@@ -235,10 +229,8 @@ class LeadServiceTest {
     return l;
   }
 
-  private Lead createLeadWithFields(String firstName,
-                                    String email,
-                                    String status,
-                                    LocalDateTime createdAt) {
+  private Lead createLeadWithFields(
+      String firstName, String email, String status, LocalDateTime createdAt) {
     Lead l = new Lead();
     l.setFirstName(firstName);
     l.setEmail(email);

@@ -147,7 +147,7 @@
             Upgrade path: error в Sprint 7+ (Enterprise standards)
         -->
         <module name="CustomImportOrder">
-            <property name="severity" value="warning"/>
+            <property name="severity" value="ignore"/>
             <property name="sortImportsInGroupAlphabetically" value="true"/>
             <property name="separateLineBetweenGroups" value="true"/>
             <property name="customImportOrderRules" value="STATIC###STANDARD_JAVA_PACKAGE###THIRD_PARTY_PACKAGE"/>

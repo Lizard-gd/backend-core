@@ -4,7 +4,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.math.BigDecimal;
 import java.util.UUID;
-
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -17,11 +16,9 @@ import ru.mentee.power.crm.model.Product;
 @Transactional
 class DealProductIntegrationTest {
 
-  @Autowired
-  private DealJpaRepository dealJpaRepository;
+  @Autowired private DealJpaRepository dealJpaRepository;
 
-  @Autowired
-  private ProductJpaRepository productJpaRepository;
+  @Autowired private ProductJpaRepository productJpaRepository;
 
   @Test
   void testSaveDealWithProducts() {
@@ -42,10 +39,8 @@ class DealProductIntegrationTest {
     productJpaRepository.save(product1);
     productJpaRepository.save(product2);
 
-    DealProduct dealProduct1 = new DealProduct(product1,
-            2, new BigDecimal("81000.00"));
-    DealProduct dealProduct2 = new DealProduct(product2,
-            1, new BigDecimal("25000.00"));
+    DealProduct dealProduct1 = new DealProduct(product1, 2, new BigDecimal("81000.00"));
+    DealProduct dealProduct2 = new DealProduct(product2, 1, new BigDecimal("25000.00"));
 
     deal.addDealProduct(dealProduct1);
     deal.addDealProduct(dealProduct2);
@@ -54,28 +49,31 @@ class DealProductIntegrationTest {
 
     dealJpaRepository.flush();
     // dealJpaRepository.deleteAll();
-    Deal loadedDeal = dealJpaRepository.findDealWithProducts(savedDeal.getId())
-        .orElseThrow(() -> new AssertionError("Deal not found"));
+    Deal loadedDeal =
+        dealJpaRepository
+            .findDealWithProducts(savedDeal.getId())
+            .orElseThrow(() -> new AssertionError("Deal not found"));
 
     assertThat(loadedDeal.getDealProducts()).hasSize(2);
 
-    DealProduct loadedDp1 = loadedDeal.getDealProducts().stream()
-        .filter(dp -> dp.getProduct().getSku().equals("LAP-DELL-001"))
-        .findFirst()
-        .orElseThrow();
+    DealProduct loadedDp1 =
+        loadedDeal.getDealProducts().stream()
+            .filter(dp -> dp.getProduct().getSku().equals("LAP-DELL-001"))
+            .findFirst()
+            .orElseThrow();
     assertThat(loadedDp1.getQuantity()).isEqualTo(2);
     assertThat(loadedDp1.getUnitPrice()).isEqualByComparingTo("81000.00");
 
-    DealProduct loadedDp2 = loadedDeal.getDealProducts().stream()
-        .filter(dp -> dp.getProduct().getSku().equals("MON-LG-002"))
-        .findFirst()
-        .orElseThrow();
+    DealProduct loadedDp2 =
+        loadedDeal.getDealProducts().stream()
+            .filter(dp -> dp.getProduct().getSku().equals("MON-LG-002"))
+            .findFirst()
+            .orElseThrow();
     assertThat(loadedDp2.getQuantity()).isEqualTo(1);
     assertThat(loadedDp2.getUnitPrice()).isEqualByComparingTo("25000.00");
   }
 
-  @Autowired
-  private jakarta.persistence.EntityManager entityManager;
+  @Autowired private jakarta.persistence.EntityManager entityManager;
 
   @Test
   void testEntityGraphSolvesNPlusOne() {

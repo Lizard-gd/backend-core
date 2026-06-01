@@ -1,12 +1,5 @@
 package ru.mentee.power.crm.model;
 
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
-
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -16,6 +9,12 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.UUID;
 import lombok.NoArgsConstructor;
 
 @Entity
@@ -40,8 +39,11 @@ public class Deal {
   @Column(name = "created_at", nullable = false, updatable = false)
   private LocalDateTime createdAt;
 
-  @OneToMany(mappedBy = "deal", cascade = CascadeType.ALL,
-          orphanRemoval = true, fetch = FetchType.LAZY)
+  @OneToMany(
+      mappedBy = "deal",
+      cascade = CascadeType.ALL,
+      orphanRemoval = true,
+      fetch = FetchType.LAZY)
   private List<DealProduct> dealProducts = new ArrayList<>();
 
   public void addDealProduct(DealProduct dealProduct) {
@@ -62,8 +64,8 @@ public class Deal {
     this.createdAt = LocalDateTime.now();
   }
 
-  public Deal(String id, String leadId, BigDecimal amount,
-              DealStatus status, LocalDateTime createdAt) {
+  public Deal(
+      String id, String leadId, BigDecimal amount, DealStatus status, LocalDateTime createdAt) {
     this.id = id;
     this.leadId = leadId;
     this.amount = amount;
