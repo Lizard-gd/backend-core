@@ -4,7 +4,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,14 +16,11 @@ import ru.mentee.power.crm.model.Lead;
 @Transactional
 class CompanyRepositoryTest {
 
-  @Autowired
-  private CompanyRepository companyRepository;
+  @Autowired private CompanyRepository companyRepository;
 
-  @Autowired
-  private LeadRepository leadRepository;
+  @Autowired private LeadRepository leadRepository;
 
-  @Autowired
-  private jakarta.persistence.EntityManager entityManager;
+  @Autowired private jakarta.persistence.EntityManager entityManager;
 
   @BeforeEach
   void cleanUp() {
@@ -38,12 +34,11 @@ class CompanyRepositoryTest {
     company.setName("Яндекс");
     company.setIndustry("IT");
 
-    Lead lead1 = new Lead("Алексей", "alex@yandex.ru",
-            "+71234567890", "NEW", LocalDateTime.now());
-    Lead lead2 = new Lead("Мария", "maria@yandex.ru",
-            "+79876543210", "CONTACTED", LocalDateTime.now());
-    Lead lead3 = new Lead("Дмитрий", "dmitry@yandex.ru",
-            "+75553332211", "QUALIFIED", LocalDateTime.now());
+    Lead lead1 = new Lead("Алексей", "alex@yandex.ru", "+71234567890", "NEW", LocalDateTime.now());
+    Lead lead2 =
+        new Lead("Мария", "maria@yandex.ru", "+79876543210", "CONTACTED", LocalDateTime.now());
+    Lead lead3 =
+        new Lead("Дмитрий", "dmitry@yandex.ru", "+75553332211", "QUALIFIED", LocalDateTime.now());
 
     company.addLead(lead1);
     company.addLead(lead2);
@@ -72,13 +67,13 @@ class CompanyRepositoryTest {
     company.setIndustry("Finance");
 
     for (int i = 1; i <= 3; i++) {
-      Lead lead = new Lead(
+      Lead lead =
+          new Lead(
               "Клиент" + i,
               "client" + i + "@tinkoff.ru",
               "+7000000000" + i,
               "NEW",
-              LocalDateTime.now()
-      );
+              LocalDateTime.now());
       company.addLead(lead);
     }
 
@@ -88,7 +83,9 @@ class CompanyRepositoryTest {
     entityManager.flush();
     entityManager.clear();
 
-    Company found = companyRepository.findByIdWithLeads(companyId)
+    Company found =
+        companyRepository
+            .findByIdWithLeads(companyId)
             .orElseThrow(() -> new AssertionError("Company not found with id: " + companyId));
 
     assertThat(found.getLeads()).hasSize(3);

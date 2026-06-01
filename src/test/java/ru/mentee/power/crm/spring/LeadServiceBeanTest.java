@@ -13,11 +13,9 @@ import ru.mentee.power.crm.service.LeadService;
 @SpringBootTest
 public class LeadServiceBeanTest {
 
-  @Autowired
-  private ApplicationContext context;
+  @Autowired private ApplicationContext context;
 
-  @Autowired
-  private LeadRepository leadRepository;
+  @Autowired private LeadRepository leadRepository;
 
   @BeforeEach
   void cleanUp() {

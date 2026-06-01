@@ -6,6 +6,7 @@ plugins {
     id 'gg.jte.gradle' version '3.2.3'
     id 'org.springframework.boot' version '4.0.2'
     id 'io.spring.dependency-management' version '1.1.7'
+    id 'com.diffplug.spotless' version '8.4.0'
 }
 
 group = 'ru.mentee.power'
@@ -161,4 +162,20 @@ jte {
 
 springBoot {
     mainClass = 'ru.mentee.power.crm.spring.Application'
+}
+
+spotless {
+    java {
+        target 'src/main/java/**/*.java', 'src/test/java/**/*.java'
+
+        targetExclude 'build/**', 'src/main/generated/**'
+
+         googleJavaFormat('1.35.0')
+
+        removeUnusedImports()
+
+        trimTrailingWhitespace()
+
+        endWithNewline()
+    }
 }

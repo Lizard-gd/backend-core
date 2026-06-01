@@ -1,11 +1,10 @@
 package ru.mentee.power.crm.spring.controller;
 
+import jakarta.validation.Valid;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-
-import jakarta.validation.Valid;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
@@ -45,10 +44,11 @@ public class LeadController {
   }
 
   @PostMapping("/leads")
-  public String createLead(@Valid @ModelAttribute("lead") Lead lead,
-                           BindingResult result,
-                           @RequestParam(required = false) UUID companyId,
-                           Model model) {
+  public String createLead(
+      @Valid @ModelAttribute("lead") Lead lead,
+      BindingResult result,
+      @RequestParam(required = false) UUID companyId,
+      Model model) {
     if (result.hasErrors()) {
       model.addAttribute("lead", lead);
       model.addAttribute("errors", result);
@@ -56,8 +56,8 @@ public class LeadController {
       return "leads/create";
     }
     try {
-      leadService.addLead(lead.getFirstName(), lead.getEmail(),
-              lead.getPhone(), lead.getStatus(), companyId);
+      leadService.addLead(
+          lead.getFirstName(), lead.getEmail(), lead.getPhone(), lead.getStatus(), companyId);
     } catch (IllegalStateException e) {
       result.rejectValue("email", "error.duplicate", "Лид с таким email уже существует");
       model.addAttribute("lead", lead);
@@ -70,14 +70,13 @@ public class LeadController {
 
   @GetMapping("/leads")
   public String showLeads(
-          @RequestParam(required = false) String search,
-          @RequestParam(required = false) String status,
-          @RequestParam(required = false) @DateTimeFormat(iso
-                  = DateTimeFormat.ISO.DATE_TIME) LocalDateTime fromDateTime,
-          @RequestParam(required = false) @DateTimeFormat(iso
-                  = DateTimeFormat.ISO.DATE_TIME) LocalDateTime toDateTime,
-          Model model
-  ) {
+      @RequestParam(required = false) String search,
+      @RequestParam(required = false) String status,
+      @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+          LocalDateTime fromDateTime,
+      @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+          LocalDateTime toDateTime,
+      Model model) {
     List<Lead> leads = leadService.findLeads(search, status, fromDateTime, toDateTime);
 
     model.addAttribute("leads", leads);
@@ -109,11 +108,12 @@ public class LeadController {
   }
 
   @PostMapping("/leads/{id}")
-  public String updateLead(@PathVariable String id,
-                           @Valid @ModelAttribute("lead") Lead lead,
-                           BindingResult result,
-                           @RequestParam(required = false) UUID companyId,
-                           Model model) {
+  public String updateLead(
+      @PathVariable String id,
+      @Valid @ModelAttribute("lead") Lead lead,
+      BindingResult result,
+      @RequestParam(required = false) UUID companyId,
+      Model model) {
     if (result.hasErrors()) {
       model.addAttribute("lead", lead);
       model.addAttribute("errors", result);

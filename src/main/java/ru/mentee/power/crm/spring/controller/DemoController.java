@@ -11,8 +11,7 @@ import ru.mentee.power.crm.service.LeadService;
 public class DemoController {
   private final LeadService constructorService;
 
-  @Autowired
-  private LeadRepository filedRepository;
+  @Autowired private LeadRepository filedRepository;
 
   private LeadService setterService;
 
@@ -30,12 +29,15 @@ public class DemoController {
   public String demo() {
     StringBuilder sb = new StringBuilder();
     sb.append("DI types Demo:\n\n");
-    sb.append("Constructor Injection (final): ").append(constructorService != null ? "✓ Injected"
-            : "✗ NULL").append("\n");
-    sb.append("Filed Injection (@Autowired filed): ").append(filedRepository != null ? "✓ Injected"
-            : "✗ NULL").append("\n");
-    sb.append("Setter Injection (@Autowired setter): ").append(setterService != null ? "✓ Injected"
-            : "✗ NULL").append("\n\n");
+    sb.append("Constructor Injection (final): ")
+        .append(constructorService != null ? "✓ Injected" : "✗ NULL")
+        .append("\n");
+    sb.append("Filed Injection (@Autowired filed): ")
+        .append(filedRepository != null ? "✓ Injected" : "✗ NULL")
+        .append("\n");
+    sb.append("Setter Injection (@Autowired setter): ")
+        .append(setterService != null ? "✓ Injected" : "✗ NULL")
+        .append("\n\n");
     sb.append("Recommendation: Use Constructor Injection with final fields.");
     return sb.toString().replace("\n", "<br>");
   }

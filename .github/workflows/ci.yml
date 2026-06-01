@@ -1,4 +1,4 @@
-name: Java CI with Checkstyle and Tests
+name: Java CI with Spotless Checkstyle and Tests
 
 on:
   push:
@@ -26,6 +26,9 @@ jobs:
           distribution: 'temurin'
           java-version: '25'
           cache: 'gradle'
+
+      - name: Check code formatting (Spotless)
+        run: ./gradlew --no-daemon spotlessCheck
 
       - name: Run Checkstyle
         run: ./gradlew --no-daemon checkstyleMain

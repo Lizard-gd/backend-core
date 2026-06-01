@@ -1,7 +1,6 @@
 package ru.mentee.power.crm.service;
 
 import java.util.UUID;
-
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,8 +18,10 @@ public class LeadProcessor {
 
   @Transactional(propagation = Propagation.REQUIRES_NEW)
   public void processSingleLead(UUID leadId) {
-    Lead lead = leadRepository.findById(leadId)
-                .orElseThrow(() -> new IllegalArgumentException("Lead not found: " + leadId));
+    Lead lead =
+        leadRepository
+            .findById(leadId)
+            .orElseThrow(() -> new IllegalArgumentException("Lead not found: " + leadId));
     lead.setStatus("PROCESSED");
     leadRepository.save(lead);
 

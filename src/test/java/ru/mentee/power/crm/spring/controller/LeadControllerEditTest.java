@@ -17,7 +17,6 @@ import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.Optional;
 import java.util.UUID;
-
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -41,29 +40,21 @@ import ru.mentee.power.crm.service.ParentService;
 @ActiveProfiles("test")
 class LeadControllerEditTest {
 
-  @Autowired
-  private MockMvc mockMvc;
+  @Autowired private MockMvc mockMvc;
 
-  @MockitoBean
-  private LeadService leadService;
+  @MockitoBean private LeadService leadService;
 
-  @MockitoBean
-  private DealService dealService;
+  @MockitoBean private DealService dealService;
 
-  @MockitoBean
-  private CompanyRepository companyRepository;
+  @MockitoBean private CompanyRepository companyRepository;
 
-  @MockitoBean
-  private LeadRepository leadRepository;
+  @MockitoBean private LeadRepository leadRepository;
 
-  @MockitoBean
-  private ChildService childService;
+  @MockitoBean private ChildService childService;
 
-  @MockitoBean
-  private LeadProcessor leadProcessor;
+  @MockitoBean private LeadProcessor leadProcessor;
 
-  @MockitoBean
-  private ParentService parentService;
+  @MockitoBean private ParentService parentService;
 
   @Test
   void shouldShowEditFormWithPrefilledData() throws Exception {
@@ -80,10 +71,11 @@ class LeadControllerEditTest {
     when(leadService.findById(leadId)).thenReturn(Optional.of(testLead));
     when(companyRepository.findAll()).thenReturn(Collections.emptyList());
 
-    mockMvc.perform(get("/leads/{id}/edit", leadId.toString()))
-            .andExpect(status().isOk())
-            .andExpect(view().name("spring/edit"))
-            .andExpect(model().attributeExists("lead"));
+    mockMvc
+        .perform(get("/leads/{id}/edit", leadId.toString()))
+        .andExpect(status().isOk())
+        .andExpect(view().name("spring/edit"))
+        .andExpect(model().attributeExists("lead"));
   }
 
   @Test
@@ -94,14 +86,16 @@ class LeadControllerEditTest {
     existingLead.setId(leadId);
     when(leadService.findById(leadId)).thenReturn(Optional.of(existingLead));
 
-    mockMvc.perform(post("/leads/{id}", leadId.toString())
-                    .param("firstName", "UpdatedName")
-                    .param("email", "updated@example.com")
-                    .param("phone", "+222222")
-                    .param("companyId", companyId.toString())
-                    .param("status", "QUALIFIED"))
-            .andExpect(status().is3xxRedirection())
-            .andExpect(redirectedUrl("/leads"));
+    mockMvc
+        .perform(
+            post("/leads/{id}", leadId.toString())
+                .param("firstName", "UpdatedName")
+                .param("email", "updated@example.com")
+                .param("phone", "+222222")
+                .param("companyId", companyId.toString())
+                .param("status", "QUALIFIED"))
+        .andExpect(status().is3xxRedirection())
+        .andExpect(redirectedUrl("/leads"));
 
     verify(leadService).update(eq(leadId), any(Lead.class));
   }
@@ -111,8 +105,9 @@ class LeadControllerEditTest {
     UUID nonExistent = UUID.randomUUID();
     when(leadService.findById(nonExistent)).thenReturn(Optional.empty());
 
-    mockMvc.perform(get("/leads/{id}/edit", nonExistent.toString()))
-            .andExpect(status().isNotFound());
+    mockMvc
+        .perform(get("/leads/{id}/edit", nonExistent.toString()))
+        .andExpect(status().isNotFound());
   }
 
   @Test
@@ -120,9 +115,10 @@ class LeadControllerEditTest {
     UUID leadId = UUID.randomUUID();
     doNothing().when(leadService).delete(leadId);
 
-    mockMvc.perform(post("/leads/{id}/delete", leadId.toString()))
-            .andExpect(status().is3xxRedirection())
-            .andExpect(redirectedUrl("/leads"));
+    mockMvc
+        .perform(post("/leads/{id}/delete", leadId.toString()))
+        .andExpect(status().is3xxRedirection())
+        .andExpect(redirectedUrl("/leads"));
 
     verify(leadService).delete(leadId);
   }
@@ -131,9 +127,11 @@ class LeadControllerEditTest {
   void shouldReturn404WhenLeadNotFound_forDelete() throws Exception {
     UUID nonExistent = UUID.randomUUID();
     doThrow(new ResponseStatusException(HttpStatus.NOT_FOUND, "Lead not found"))
-            .when(leadService).delete(nonExistent);
+        .when(leadService)
+        .delete(nonExistent);
 
-    mockMvc.perform(post("/leads/{id}/delete", nonExistent.toString()))
-            .andExpect(status().isNotFound());
+    mockMvc
+        .perform(post("/leads/{id}/delete", nonExistent.toString()))
+        .andExpect(status().isNotFound());
   }
 }

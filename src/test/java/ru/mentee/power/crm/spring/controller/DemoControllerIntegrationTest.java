@@ -16,28 +16,27 @@ import ru.mentee.power.crm.service.LeadService;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 @AutoConfigureMockMvc
-@TestPropertySource(properties = {
-  "spring.autoconfigure.exclude="
-                + "org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration,"
-                + "org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration,"
-                + "org.springframework.boot.autoconfigure.data.jpa.JpaRepositoriesAutoConfiguration"
-})
+@TestPropertySource(
+    properties = {
+      "spring.autoconfigure.exclude="
+          + "org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration,"
+          + "org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration,"
+          + "org.springframework.boot.autoconfigure.data.jpa.JpaRepositoriesAutoConfiguration"
+    })
 class DemoControllerIntegrationTest {
 
-  @Autowired
-  private MockMvc mockMvc;
+  @Autowired private MockMvc mockMvc;
 
-  @MockitoBean
-  private LeadService leadService;
+  @MockitoBean private LeadService leadService;
 
-  @MockitoBean
-  private LeadRepository leadRepository;
+  @MockitoBean private LeadRepository leadRepository;
 
   @Test
   void demoEndpointReturnsAllInjections() throws Exception {
-    mockMvc.perform(get("/demo"))
-            .andExpect(status().isOk())
-            .andExpect(content().string(org.hamcrest.Matchers.containsString("✓ Injected")))
-            .andExpect(content().string(org.hamcrest.Matchers.containsString("Recommendation")));
+    mockMvc
+        .perform(get("/demo"))
+        .andExpect(status().isOk())
+        .andExpect(content().string(org.hamcrest.Matchers.containsString("✓ Injected")))
+        .andExpect(content().string(org.hamcrest.Matchers.containsString("Recommendation")));
   }
 }

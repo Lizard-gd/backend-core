@@ -1,10 +1,9 @@
 package ru.mentee.power.crm.repository;
 
+import jakarta.persistence.LockModeType;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-
-import jakarta.persistence.LockModeType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -71,8 +70,8 @@ public interface LeadRepository extends JpaRepository<Lead, UUID> {
   Page<Lead> findByCompanyName(@Param("companyName") String companyName, Pageable pageable);
 
   @Query("SELECT l FROM Lead l WHERE l.status = :status AND l.company.id = :companyId")
-  List<Lead> findByStatusAndCompanyId(@Param("status") String status,
-                                      @Param("companyId") UUID companyId);
+  List<Lead> findByStatusAndCompanyId(
+      @Param("status") String status, @Param("companyId") UUID companyId);
 
   Optional<Lead> findByEmailIgnoreCase(String email);
 }

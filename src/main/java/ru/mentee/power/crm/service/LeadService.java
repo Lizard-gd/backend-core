@@ -1,12 +1,11 @@
 package ru.mentee.power.crm.service;
 
+import jakarta.annotation.PostConstruct;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
-
-import jakarta.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
@@ -34,10 +33,11 @@ public class LeadService {
   private final LeadProcessor leadProcessor;
   private final CompanyRepository companyRepository;
 
-  public LeadService(LeadRepository repository,
-                     DealRepository dealRepository,
-                     LeadProcessor leadProcessor,
-                     CompanyRepository companyRepository) {
+  public LeadService(
+      LeadRepository repository,
+      DealRepository dealRepository,
+      LeadProcessor leadProcessor,
+      CompanyRepository companyRepository) {
     this.repository = repository;
     this.dealRepository = dealRepository;
     this.leadProcessor = leadProcessor;
@@ -64,7 +64,9 @@ public class LeadService {
     newLead.setCreatedAt(LocalDateTime.now());
 
     if (companyId != null) {
-      Company company = companyRepository.findById(companyId)
+      Company company =
+          companyRepository
+              .findById(companyId)
               .orElseThrow(() -> new IllegalArgumentException("Company not found: " + companyId));
       newLead.setCompany(company);
     }
@@ -95,7 +97,9 @@ public class LeadService {
 
   @Transactional
   public Lead update(UUID id, Lead updatedLead) {
-    Lead existing = repository.findById(id)
+    Lead existing =
+        repository
+            .findById(id)
             .orElseThrow(() -> new IllegalArgumentException("Lead not found with id: " + id));
 
     existing.setFirstName(updatedLead.getFirstName());
@@ -114,21 +118,23 @@ public class LeadService {
     Optional<Lead> existing = repository.findById(id);
     if (existing.isEmpty()) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Lead not found with id: " + id);
-    } repository.deleteById(id);
+    }
+    repository.deleteById(id);
   }
 
-  public List<Lead> findLeads(String search, String status,
-                              LocalDateTime fromDateTime, LocalDateTime toDateTime) {
+  public List<Lead> findLeads(
+      String search, String status, LocalDateTime fromDateTime, LocalDateTime toDateTime) {
     List<Lead> allLeads = repository.findAll();
 
     var stream = allLeads.stream();
 
     if (search != null && !search.isBlank()) {
       String lowerSearch = search.toLowerCase();
-      stream = stream.filter(lead ->
-              lead.getFirstName().toLowerCase().contains(lowerSearch)
-                      || lead.getEmail().toLowerCase().contains(lowerSearch)
-      );
+      stream =
+          stream.filter(
+              lead ->
+                  lead.getFirstName().toLowerCase().contains(lowerSearch)
+                      || lead.getEmail().toLowerCase().contains(lowerSearch));
     }
     if (status != null && !status.isBlank()) {
       stream = stream.filter(lead -> lead.getStatus().equals(status));
@@ -158,8 +164,8 @@ public class LeadService {
   @Transactional
   public int bulkUpdateStatus(String oldStatus, String newStatus) {
     int updated = repository.updateStatusBulk(oldStatus, newStatus);
-    System.out.println("Bulk update: " + updated + " leads changed from "
-            + oldStatus + " to " + newStatus);
+    System.out.println(
+        "Bulk update: " + updated + " leads changed from " + oldStatus + " to " + newStatus);
     return updated;
   }
 
@@ -172,13 +178,14 @@ public class LeadService {
 
   @Transactional
   public Deal convertLeadToDeal(UUID leadId, CreateDealRequest request) {
-    Lead lead = repository.findById(leadId)
+    Lead lead =
+        repository
+            .findById(leadId)
             .orElseThrow(() -> new IllegalArgumentException("Lead not found: " + leadId));
 
     if (!"QUALIFIED".equals(lead.getStatus())) {
       throw new IllegalStateException(
-              "Lead " + leadId + " cannot be converted. Current status: " + lead.getStatus()
-      );
+          "Lead " + leadId + " cannot be converted. Current status: " + lead.getStatus());
     }
 
     Deal newDeal = new Deal(leadId.toString(), request.getAmount());

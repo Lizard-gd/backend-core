@@ -1,8 +1,5 @@
 package ru.mentee.power.crm.model;
 
-import java.time.LocalDateTime;
-import java.util.UUID;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -16,6 +13,8 @@ import jakarta.persistence.Version;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
+import java.time.LocalDateTime;
+import java.util.UUID;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -30,43 +29,44 @@ import lombok.Setter;
 public class Lead {
 
   @Id
-      @GeneratedValue(strategy = GenerationType.UUID)
-      private UUID id;
+  @GeneratedValue(strategy = GenerationType.UUID)
+  private UUID id;
 
   @Column(nullable = false)
-      @NotBlank(message = "Имя обязательно")
-      String firstName;
+  @NotBlank(message = "Имя обязательно")
+  String firstName;
 
   @Column(nullable = false, unique = true, length = 255)
-      @NotBlank(message = "Email обязателен")
-      @Email(message = "Некорректный формат email")
-      @Pattern(regexp = ".*\\..*", message = "Email должен содержать домен (например: .com, .ru)")
-      String email;
+  @NotBlank(message = "Email обязателен")
+  @Email(message = "Некорректный формат email")
+  @Pattern(regexp = ".*\\..*", message = "Email должен содержать домен (например: .com, .ru)")
+  String email;
 
   @Column(nullable = false)
-      @NotBlank(message = "Телефон обязателен")
-      @Pattern(regexp = "^\\+[0-9]{6,15}$",
-              message = "Телефон должен начинаться с '+' и содержать от 6 до 15 цифр")
-      String phone;
+  @NotBlank(message = "Телефон обязателен")
+  @Pattern(
+      regexp = "^\\+[0-9]{6,15}$",
+      message = "Телефон должен начинаться с '+' и содержать от 6 до 15 цифр")
+  String phone;
 
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "company_id")
   private Company company;
 
   @Column(nullable = false)
-      @NotBlank(message = "Статус обязателен")
-      String status;
+  @NotBlank(message = "Статус обязателен")
+  String status;
 
   @Column(name = "created_at", nullable = false, updatable = false)
-      LocalDateTime createdAt;
+  LocalDateTime createdAt;
 
   @Version
   @Column(name = "version", nullable = false)
   @Setter(AccessLevel.NONE)
   private Long version;
 
-  public Lead(String firstName, String email,
-              String phone, String status, LocalDateTime createdAt) {
+  public Lead(
+      String firstName, String email, String phone, String status, LocalDateTime createdAt) {
     this.firstName = firstName;
     this.email = email;
     this.phone = phone;
@@ -74,8 +74,13 @@ public class Lead {
     this.createdAt = createdAt;
   }
 
-  public Lead(UUID id, String firstName, String email,
-              String phone, String status, LocalDateTime createdAt) {
+  public Lead(
+      UUID id,
+      String firstName,
+      String email,
+      String phone,
+      String status,
+      LocalDateTime createdAt) {
     this.id = id;
     this.firstName = firstName;
     this.email = email;

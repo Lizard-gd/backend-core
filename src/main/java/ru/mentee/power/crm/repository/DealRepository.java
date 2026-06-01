@@ -2,7 +2,6 @@ package ru.mentee.power.crm.repository;
 
 import java.util.List;
 import java.util.Optional;
-
 import ru.mentee.power.crm.model.Deal;
 import ru.mentee.power.crm.model.DealStatus;
 

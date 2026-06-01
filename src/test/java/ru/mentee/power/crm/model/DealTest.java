@@ -5,7 +5,6 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.math.BigDecimal;
 import java.util.UUID;
-
 import org.junit.jupiter.api.Test;
 
 class DealTest {
@@ -40,8 +39,8 @@ class DealTest {
     deal.transitionTo(DealStatus.LOST);
 
     assertThatThrownBy(() -> deal.transitionTo(DealStatus.NEW))
-              .isInstanceOf(IllegalStateException.class)
-              .hasMessageContaining("Cannot transition from LOST to NEW");
+        .isInstanceOf(IllegalStateException.class)
+        .hasMessageContaining("Cannot transition from LOST to NEW");
   }
 
   @Test
@@ -64,8 +63,8 @@ class DealTest {
   @Test
   void equalsAndHashCode_shouldWorkById() {
     Deal deal1 = new Deal("lead-1", BigDecimal.TEN);
-    Deal deal2 = new Deal(deal1.getId(), "lead-2",
-            BigDecimal.ONE, DealStatus.NEW, deal1.getCreatedAt());
+    Deal deal2 =
+        new Deal(deal1.getId(), "lead-2", BigDecimal.ONE, DealStatus.NEW, deal1.getCreatedAt());
 
     assertThat(deal1).isEqualTo(deal2);
     assertThat(deal1.hashCode()).isEqualTo(deal2.hashCode());

@@ -7,7 +7,6 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,14 +19,11 @@ import ru.mentee.power.crm.repository.LeadRepository;
 @SpringBootTest
 class SelfInvocationProblemTest {
 
-  @Autowired
-  private LeadService leadService;
+  @Autowired private LeadService leadService;
 
-  @Autowired
-  private LeadRepository leadRepository;
+  @Autowired private LeadRepository leadRepository;
 
-  @Autowired
-  private CompanyRepository companyRepository;
+  @Autowired private CompanyRepository companyRepository;
 
   private Company testCompany;
 
@@ -58,8 +54,7 @@ class SelfInvocationProblemTest {
         ids.add(lead.getId());
       }
 
-      assertThatThrownBy(() -> leadService.processLeads(ids))
-              .isInstanceOf(RuntimeException.class);
+      assertThatThrownBy(() -> leadService.processLeads(ids)).isInstanceOf(RuntimeException.class);
 
       Lead firstLead = leadRepository.findById(ids.get(0)).orElseThrow();
       assertThat(firstLead.getStatus()).isEqualTo("PROCESSED");

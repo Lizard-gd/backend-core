@@ -3,7 +3,6 @@ package ru.mentee.power.crm.spring;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
-
 import ru.mentee.power.crm.model.Lead;
 import ru.mentee.power.crm.service.LeadService;
 
@@ -41,8 +40,6 @@ public class MockLeadService extends LeadService {
 
   @Override
   public List<Lead> findByStatus(String status) {
-    return mockLeads.stream()
-            .filter(lead -> lead.getStatus().equals(status))
-            .toList();
+    return mockLeads.stream().filter(lead -> lead.getStatus().equals(status)).toList();
   }
 }

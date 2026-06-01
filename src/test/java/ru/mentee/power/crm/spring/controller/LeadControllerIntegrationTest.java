@@ -12,8 +12,7 @@ import org.springframework.web.client.RestTemplate;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class LeadControllerIntegrationTest {
 
-  @LocalServerPort
-  private int port;
+  @LocalServerPort private int port;
 
   @Test
   void shouldReturn200Ok_whenGetLeads() {

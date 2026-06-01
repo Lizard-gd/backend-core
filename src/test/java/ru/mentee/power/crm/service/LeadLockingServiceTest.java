@@ -10,7 +10,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,14 +23,11 @@ import ru.mentee.power.crm.repository.LeadRepository;
 @SpringBootTest
 class LeadLockingServiceTest {
 
-  @Autowired
-  private LeadLockingService leadLockingService;
+  @Autowired private LeadLockingService leadLockingService;
 
-  @Autowired
-  private LeadRepository leadRepository;
+  @Autowired private LeadRepository leadRepository;
 
-  @Autowired
-  private CompanyRepository companyRepository;
+  @Autowired private CompanyRepository companyRepository;
 
   private UUID testLeadId;
 
@@ -62,19 +58,23 @@ class LeadLockingServiceTest {
     CountDownLatch startLatch = new CountDownLatch(1);
     CountDownLatch doneLatch = new CountDownLatch(2);
 
-    Future<String> task1 = executor.submit(() -> {
-      startLatch.await();
-      Lead updated = leadLockingService.convertLeadToDealWithLock(testLeadId, "CONTACTED");
-      doneLatch.countDown();
-      return updated.getStatus();
-    });
+    Future<String> task1 =
+        executor.submit(
+            () -> {
+              startLatch.await();
+              Lead updated = leadLockingService.convertLeadToDealWithLock(testLeadId, "CONTACTED");
+              doneLatch.countDown();
+              return updated.getStatus();
+            });
 
-    Future<String> task2 = executor.submit(() -> {
-      startLatch.await();
-      Lead updated = leadLockingService.convertLeadToDealWithLock(testLeadId, "QUALIFIED");
-      doneLatch.countDown();
-      return updated.getStatus();
-    });
+    Future<String> task2 =
+        executor.submit(
+            () -> {
+              startLatch.await();
+              Lead updated = leadLockingService.convertLeadToDealWithLock(testLeadId, "QUALIFIED");
+              doneLatch.countDown();
+              return updated.getStatus();
+            });
 
     startLatch.countDown();
     boolean finished = doneLatch.await(10, TimeUnit.SECONDS);
@@ -94,31 +94,35 @@ class LeadLockingServiceTest {
     CountDownLatch startLatch = new CountDownLatch(1);
     CountDownLatch doneLatch = new CountDownLatch(2);
 
-    Future<?> task1 = executor.submit(() -> {
-      try {
-        startLatch.await();
-      } catch (InterruptedException e) {
-        throw new RuntimeException(e);
-      }
-      try {
-        leadLockingService.updateLeadStatusOptimistic(testLeadId, "CONTACTED");
-      } finally {
-        doneLatch.countDown();
-      }
-    });
+    Future<?> task1 =
+        executor.submit(
+            () -> {
+              try {
+                startLatch.await();
+              } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+              }
+              try {
+                leadLockingService.updateLeadStatusOptimistic(testLeadId, "CONTACTED");
+              } finally {
+                doneLatch.countDown();
+              }
+            });
 
-    Future<?> task2 = executor.submit(() -> {
-      try {
-        startLatch.await();
-      } catch (InterruptedException e) {
-        throw new RuntimeException(e);
-      }
-      try {
-        leadLockingService.updateLeadStatusOptimistic(testLeadId, "QUALIFIED");
-      } finally {
-        doneLatch.countDown();
-      }
-    });
+    Future<?> task2 =
+        executor.submit(
+            () -> {
+              try {
+                startLatch.await();
+              } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+              }
+              try {
+                leadLockingService.updateLeadStatusOptimistic(testLeadId, "QUALIFIED");
+              } finally {
+                doneLatch.countDown();
+              }
+            });
 
     startLatch.countDown();
     boolean finished = doneLatch.await(10, TimeUnit.SECONDS);

@@ -6,7 +6,6 @@ import static org.assertj.core.api.Assertions.assertThatCode;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import ru.mentee.power.crm.model.Deal;
@@ -109,7 +108,6 @@ class InMemoryDealRepositoryTest {
 
   @Test
   void deleteByIdShouldNotFailWhenIdDoesNotExist() {
-    assertThatCode(() -> repository.deleteById("non-existent"))
-        .doesNotThrowAnyException();
+    assertThatCode(() -> repository.deleteById("non-existent")).doesNotThrowAnyException();
   }
 }
