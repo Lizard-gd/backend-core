@@ -1,3 +1,17 @@
+# 🧹 Backend Core-CRM · [![Java CI with Spotless Checkstyle and Tests](https://github.com/Lizard-gd/backend-core/actions/workflows/ci.yml/badge.svg)](https://github.com/Lizard-gd/backend-core/actions/workflows/ci.yml)
+
+> **Единый стиль кода** — автоматическое форматирование через Spotless (Google Java Format) + CI проверка.
+
+## 🔧 Полезные команды
+
+| Действие                                         | Команда                                       |
+|--------------------------------------------------|-----------------------------------------------|
+| ✅ Проверить форматирование                       | `./gradlew spotlessCheck`                     |
+| ✨ Исправить всё автоматически                    | `./gradlew spotlessApply`                     |
+| 🚀 Запустить CI‑проверку локально (как в GitHub) | `./gradlew spotlessCheck checkstyleMain test` |
+
+---
+
 ## 🚀 Сравнение стеков Servlet vs Spring Boot
 
 ### 📊 Результаты интеграционного теста
