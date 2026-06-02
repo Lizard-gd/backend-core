@@ -15,8 +15,19 @@ spring:
       hibernate:
         format_sql: true
         use_sql_comments: true
+  jackson:
+    default-property-inclusion: non_null
+    serialization:
+      indent-output: true
+    deserialization:
+      fail-on-unknown-properties: false
 
 logging:
   level:
     org.springframework.web: DEBUG
     org.hibernate.orm.jdbc.bind: TRACE
+
+# Внешние API
+email:
+  validation:
+    base-url: ${EMAIL_VALIDATION_URL:http://localhost:8089}

@@ -76,6 +76,9 @@ ext {
     testImplementation 'org.assertj:assertj-core:3.27.7'
 
     implementation 'org.springframework.boot:spring-boot-starter-liquibase'
+
+    // WireMock для интеграционных тестов внешних API
+    testImplementation 'org.wiremock:wiremock-standalone:3.12.1'
 }
 
 checkstyle {
