@@ -38,3 +38,24 @@ logging:
 email:
   validation:
     base-url: http://localhost:8089
+
+cloud:
+  openfeign:
+    client:
+      config:
+        default:
+          read-timeout: 5000
+
+resilience4j:
+  retry:
+    instances:
+      email-validation:
+        max-attempts: 3
+        wait-duration: 100ms
+        enable-exponential-backoff: true
+        exponential-backoff-multiplier: 2
+        retry-exceptions:
+          - java.lang.Exception
+        ignore-exceptions:
+          - feign.FeignException.BadRequest
+          - feign.FeignException.NotFound

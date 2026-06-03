@@ -26,17 +26,17 @@ import ru.mentee.power.crm.model.Lead;
 import ru.mentee.power.crm.repository.CompanyRepository;
 import ru.mentee.power.crm.repository.DealRepository;
 import ru.mentee.power.crm.repository.LeadRepository;
+import ru.mentee.power.crm.spring.client.EmailValidationFeignClient;
+import ru.mentee.power.crm.spring.client.EmailValidationResponse;
 
 @ExtendWith(MockitoExtension.class)
 class LeadServiceTest {
 
   @Mock private LeadRepository repository;
-
   @Mock private DealRepository dealRepository;
-
   @Mock private LeadProcessor leadProcessor;
-
   @Mock private CompanyRepository companyRepository;
+  @Mock private EmailValidationFeignClient emailValidationClient;
 
   @InjectMocks private LeadService service;
 
@@ -47,8 +47,14 @@ class LeadServiceTest {
     return company;
   }
 
+  private EmailValidationResponse validResponse(String email) {
+    return new EmailValidationResponse(email, true, "OK");
+  }
+
   @Test
   void shouldCreateLead_whenEmailIsUnique() {
+    String email = "unique@example.com";
+    when(emailValidationClient.validateEmail(email)).thenReturn(validResponse(email));
     when(repository.findByEmailNative(anyString())).thenReturn(Optional.empty());
     when(repository.save(any(Lead.class)))
         .thenAnswer(
@@ -60,11 +66,11 @@ class LeadServiceTest {
               return lead;
             });
 
-    Lead result = service.addLead("Ivan", "unique@example.com", "+123456789", "NEW");
+    Lead result = service.addLead("Ivan", email, "+123456789", "NEW");
 
     assertThat(result).isNotNull();
     assertThat(result.getFirstName()).isEqualTo("Ivan");
-    assertThat(result.getEmail()).isEqualTo("unique@example.com");
+    assertThat(result.getEmail()).isEqualTo(email);
     assertThat(result.getPhone()).isEqualTo("+123456789");
     assertThat(result.getCompany()).isNull();
     assertThat(result.getStatus()).isEqualTo("NEW");
@@ -79,11 +85,14 @@ class LeadServiceTest {
 
   @Test
   void shouldThrowException_whenEmailAlreadyExists() {
-    Lead existing = new Lead();
-    existing.setEmail("duplicate@example.com");
-    when(repository.findByEmailNative("duplicate@example.com")).thenReturn(Optional.of(existing));
+    String email = "duplicate@example.com";
+    when(emailValidationClient.validateEmail(email)).thenReturn(validResponse(email));
 
-    assertThatThrownBy(() -> service.addLead("Ivan", "duplicate@example.com", "111111", "NEW"))
+    Lead existing = new Lead();
+    existing.setEmail(email);
+    when(repository.findByEmailNative(email)).thenReturn(Optional.of(existing));
+
+    assertThatThrownBy(() -> service.addLead("Ivan", email, "111111", "NEW"))
         .isInstanceOf(IllegalStateException.class)
         .hasMessageContaining("Lead with email already exists");
 

@@ -3,18 +3,20 @@ package ru.mentee.power.crm.repository;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import jakarta.transaction.Transactional;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.test.context.ActiveProfiles;
 import ru.mentee.power.crm.model.Product;
 
-@DataJpaTest
+@SpringBootTest
 @ActiveProfiles("test")
+@Transactional
 class ProductJpaRepositoryTest {
 
   @Autowired private ProductJpaRepository productRepository;

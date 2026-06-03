@@ -1,5 +1,6 @@
 package ru.mentee.power.crm.service;
 
+import io.github.resilience4j.retry.annotation.Retry;
 import jakarta.annotation.PostConstruct;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -23,6 +24,8 @@ import ru.mentee.power.crm.model.Lead;
 import ru.mentee.power.crm.repository.CompanyRepository;
 import ru.mentee.power.crm.repository.DealRepository;
 import ru.mentee.power.crm.repository.LeadRepository;
+import ru.mentee.power.crm.spring.client.EmailValidationFeignClient;
+import ru.mentee.power.crm.spring.client.EmailValidationResponse;
 
 @Service
 public class LeadService {
@@ -32,16 +35,19 @@ public class LeadService {
   private final DealRepository dealRepository;
   private final LeadProcessor leadProcessor;
   private final CompanyRepository companyRepository;
+  private final EmailValidationFeignClient emailValidationClient;
 
   public LeadService(
       LeadRepository repository,
       DealRepository dealRepository,
       LeadProcessor leadProcessor,
-      CompanyRepository companyRepository) {
+      CompanyRepository companyRepository,
+      EmailValidationFeignClient emailValidationClient) {
     this.repository = repository;
     this.dealRepository = dealRepository;
     this.leadProcessor = leadProcessor;
     this.companyRepository = companyRepository;
+    this.emailValidationClient = emailValidationClient;
     log.info("LeadService constructor called");
   }
 
@@ -50,7 +56,20 @@ public class LeadService {
     log.info("LeadService @PostConstruct init() called - Bean lifecycle phase");
   }
 
+  @Retry(name = "email-validation", fallbackMethod = "addLeadFallback")
   public Lead addLead(String firstName, String email, String phone, String status, UUID companyId) {
+    try {
+      EmailValidationResponse validation = emailValidationClient.validateEmail(email);
+      if (!validation.valid()) {
+        throw new IllegalArgumentException("Email not valid: " + validation.reason());
+      }
+    } catch (feign.FeignException.BadRequest | feign.FeignException.NotFound e) {
+      throw e;
+    } catch (Exception e) {
+      log.warn("Email validation failed: {}", e.getMessage());
+      throw new RuntimeException("Email validation service unavailable", e);
+    }
+
     Optional<Lead> existing = repository.findByEmailNative(email);
     if (existing.isPresent()) {
       throw new IllegalStateException("Lead with email already exists: " + email);
@@ -71,8 +90,31 @@ public class LeadService {
       newLead.setCompany(company);
     }
 
-    repository.save(newLead);
-    return newLead;
+    return repository.save(newLead);
+  }
+
+  public Lead addLeadFallback(
+      String firstName, String email, String phone, String status, UUID companyId, Throwable t) {
+    log.warn(
+        "Fallback: email validation failed, creating lead without validation. Error: {}",
+        t.getMessage());
+
+    Lead newLead = new Lead();
+    newLead.setFirstName(firstName);
+    newLead.setEmail(email);
+    newLead.setPhone(phone);
+    newLead.setStatus(status);
+    newLead.setCreatedAt(LocalDateTime.now());
+
+    if (companyId != null) {
+      Company company =
+          companyRepository
+              .findById(companyId)
+              .orElseThrow(() -> new IllegalArgumentException("Company not found: " + companyId));
+      newLead.setCompany(company);
+    }
+
+    return repository.save(newLead);
   }
 
   public Lead addLead(String firstName, String email, String phone, String status) {
@@ -120,6 +162,33 @@ public class LeadService {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Lead not found with id: " + id);
     }
     repository.deleteById(id);
+  }
+
+  public Optional<Lead> updateLead(UUID id, Lead updatedLead) {
+    Optional<Lead> existingOpt = repository.findById(id);
+
+    if (existingOpt.isEmpty()) {
+      return Optional.empty();
+    }
+
+    Lead existing = existingOpt.get();
+    existing.setFirstName(updatedLead.getFirstName());
+    existing.setEmail(updatedLead.getEmail());
+    existing.setPhone(updatedLead.getPhone());
+    existing.setStatus(updatedLead.getStatus());
+
+    Lead saved = repository.save(existing);
+
+    return Optional.of(saved);
+  }
+
+  public boolean deleteLead(UUID id) {
+    if (repository.existsById(id)) {
+      repository.deleteById(id);
+      return true;
+    } else {
+      return false;
+    }
   }
 
   public List<Lead> findLeads(
