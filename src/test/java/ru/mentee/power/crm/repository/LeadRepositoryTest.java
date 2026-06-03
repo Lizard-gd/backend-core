@@ -2,6 +2,7 @@ package ru.mentee.power.crm.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import jakarta.transaction.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -9,13 +10,16 @@ import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.test.context.ActiveProfiles;
 import ru.mentee.power.crm.model.Company;
 import ru.mentee.power.crm.model.Lead;
 
-@DataJpaTest
+@SpringBootTest
+@ActiveProfiles("test")
+@Transactional
 class LeadRepositoryTest {
 
   @Autowired private LeadRepository leadRepository;
@@ -188,7 +192,6 @@ class LeadRepositoryTest {
   void findCreatedAfter_shouldReturnLeadsCreatedAfterDate() {
     LocalDateTime threeDaysAgo = LocalDateTime.now().minusDays(3);
     List<Lead> result = leadRepository.findCreatedAfter(threeDaysAgo);
-    // lead2 создан 2 дня назад, lead3 не создавался – должен быть только lead2
     assertThat(result).hasSize(1);
     assertThat(result.get(0).getEmail()).isEqualTo("jane@example.com");
   }
@@ -214,7 +217,6 @@ class LeadRepositoryTest {
 
   @Test
   void findByCompanyId_withPageable_shouldReturnPage() {
-    // Используем новый метод с пагинацией
     Page<Lead> page = leadRepository.findByCompanyId(companyTinkoff.getId(), PageRequest.of(0, 10));
     assertThat(page.getContent()).hasSize(2);
     assertThat(page.getTotalElements()).isEqualTo(2);

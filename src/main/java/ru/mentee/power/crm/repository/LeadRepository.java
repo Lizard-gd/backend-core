@@ -59,6 +59,8 @@ public interface LeadRepository extends JpaRepository<Lead, UUID> {
   @Query("SELECT l FROM Lead l WHERE l.id = :id")
   Optional<Lead> findByIdForUpdate(@Param("id") UUID id);
 
+  Optional<Lead> findById(UUID id);
+
   List<Lead> findByCompanyId(UUID companyId);
 
   Page<Lead> findByCompanyId(UUID companyId, Pageable pageable);
