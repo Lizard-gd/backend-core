@@ -21,9 +21,7 @@ public class UpdateLeadRequest {
   @Size(max = 255, message = "Название компании не должно превышать 255 символов")
   private String company;
 
-  public UpdateLeadRequest() {
-
-  }
+  public UpdateLeadRequest() {}
 
   public UpdateLeadRequest(String email, String firstName, String phone, String company) {
     this.email = email;
