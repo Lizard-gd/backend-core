@@ -35,6 +35,8 @@ import ru.mentee.power.crm.service.DealService;
 import ru.mentee.power.crm.service.LeadProcessor;
 import ru.mentee.power.crm.service.LeadService;
 import ru.mentee.power.crm.service.ParentService;
+import ru.mentee.power.crm.spring.dto.CreateLeadRequest;
+import ru.mentee.power.crm.spring.dto.UpdateLeadRequest;
 import tools.jackson.databind.ObjectMapper;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
@@ -65,10 +67,15 @@ class LeadRestControllerTest {
   @Test
   void getAllLeads_shouldReturn200OkWithList() throws Exception {
     Lead lead1 =
-        new Lead(UUID.randomUUID(), "John", "john@test.com", "+123", "NEW", LocalDateTime.now());
+        new Lead(UUID.randomUUID(), "John", "john@test.com", "+124233", "NEW", LocalDateTime.now());
     Lead lead2 =
         new Lead(
-            UUID.randomUUID(), "Jane", "jane@test.com", "+456", "QUALIFIED", LocalDateTime.now());
+            UUID.randomUUID(),
+            "Jane",
+            "jane@test.com",
+            "+456456",
+            "QUALIFIED",
+            LocalDateTime.now());
     List<Lead> leads = List.of(lead1, lead2);
     when(leadService.findAll()).thenReturn(leads);
 
@@ -84,7 +91,7 @@ class LeadRestControllerTest {
   @Test
   void getLeadById_whenExists_shouldReturn200OkWithLead() throws Exception {
     UUID leadId = UUID.randomUUID();
-    Lead lead = new Lead(leadId, "John", "john@test.com", "+123", "NEW", LocalDateTime.now());
+    Lead lead = new Lead(leadId, "John", "john@test.com", "+121233", "NEW", LocalDateTime.now());
     when(leadService.findById(leadId)).thenReturn(Optional.of(lead));
 
     mockMvc
@@ -108,22 +115,17 @@ class LeadRestControllerTest {
 
   @Test
   void createLead_shouldReturn201CreatedWithLocationHeader() throws Exception {
-    Lead inputLead = new Lead();
-    inputLead.setFirstName("Alice");
-    inputLead.setEmail("alice@test.com");
-    inputLead.setPhone("+789");
-    inputLead.setStatus("NEW");
-
+    CreateLeadRequest request = new CreateLeadRequest("alice@test.com", "Alice", "+787659", null);
     UUID createdId = UUID.randomUUID();
     Lead createdLead =
-        new Lead(createdId, "Alice", "alice@test.com", "+789", "NEW", LocalDateTime.now());
+        new Lead(createdId, "Alice", "alice@test.com", "+789546", "NEW", LocalDateTime.now());
     when(leadService.addLead(any(), any(), any(), any(), any())).thenReturn(createdLead);
 
     mockMvc
         .perform(
             post("/api/leads")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(inputLead)))
+                .content(objectMapper.writeValueAsString(request)))
         .andExpect(status().isCreated())
         .andExpect(header().string("Location", "/api/leads/" + createdId))
         .andExpect(jsonPath("$.id").value(createdId.toString()))
@@ -133,21 +135,22 @@ class LeadRestControllerTest {
   @Test
   void updateLead_whenExists_shouldReturn200OkWithUpdatedLead() throws Exception {
     UUID leadId = UUID.randomUUID();
-    Lead updatedLeadInput = new Lead();
-    updatedLeadInput.setFirstName("Bob Updated");
-    updatedLeadInput.setEmail("bob@test.com");
-    updatedLeadInput.setPhone("+999");
-    updatedLeadInput.setStatus("QUALIFIED");
-
+    Lead existingLead =
+        new Lead(leadId, "Bob", "bob@old.com", "+000000", "NEW", LocalDateTime.now());
+    UpdateLeadRequest updateRequest =
+        new UpdateLeadRequest("bob@test.com", "Bob Updated", "+999777", "ACME");
     Lead updatedLead =
-        new Lead(leadId, "Bob Updated", "bob@test.com", "+999", "QUALIFIED", LocalDateTime.now());
+        new Lead(
+            leadId, "Bob Updated", "bob@test.com", "+999888", "QUALIFIED", LocalDateTime.now());
+
+    when(leadService.findById(leadId)).thenReturn(Optional.of(existingLead));
     when(leadService.updateLead(eq(leadId), any(Lead.class))).thenReturn(Optional.of(updatedLead));
 
     mockMvc
         .perform(
             put("/api/leads/{id}", leadId)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(updatedLeadInput)))
+                .content(objectMapper.writeValueAsString(updateRequest)))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.firstName").value("Bob Updated"))
         .andExpect(jsonPath("$.status").value("QUALIFIED"));
