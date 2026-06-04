@@ -1,5 +1,7 @@
 package ru.mentee.power.crm.spring.rest;
 
+import java.net.URI;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -14,48 +16,72 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ru.mentee.power.crm.model.Lead;
 import ru.mentee.power.crm.service.LeadService;
+import ru.mentee.power.crm.spring.dto.CreateLeadRequest;
+import ru.mentee.power.crm.spring.dto.LeadResponse;
+import ru.mentee.power.crm.spring.dto.UpdateLeadRequest;
+import ru.mentee.power.crm.spring.mapper.LeadMapper;
 
 @RestController
 @RequestMapping("/api/leads")
 public class LeadRestController {
 
   private final LeadService leadService;
+  private final LeadMapper leadMapper;
 
-  public LeadRestController(LeadService leadService) {
+  public LeadRestController(LeadService leadService, LeadMapper leadMapper) {
     this.leadService = leadService;
+    this.leadMapper = leadMapper;
   }
 
   @GetMapping
-  public ResponseEntity<List<Lead>> getAllLeads() {
+  public ResponseEntity<List<LeadResponse>> getAllLeads() {
     List<Lead> leads = leadService.findAll();
-    return ResponseEntity.ok(leads);
+    List<LeadResponse> responses = leads.stream().map(leadMapper::toResponse).toList();
+    return ResponseEntity.ok(responses);
   }
 
   @GetMapping("/{id}")
-  public ResponseEntity<Lead> getLeadById(@PathVariable UUID id) {
-    Optional<Lead> leadOpt = leadService.findById(id);
-
-    return leadOpt.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+  public ResponseEntity<LeadResponse> getLeadById(@PathVariable UUID id) {
+    Lead lead = leadService.findById(id).orElse(null);
+    if (lead == null) {
+      return ResponseEntity.notFound().build();
+    }
+    LeadResponse response = leadMapper.toResponse(lead);
+    return ResponseEntity.ok(response);
   }
 
   @PostMapping
-  public ResponseEntity<Lead> createLead(@RequestBody Lead lead) {
-    Lead createdLead =
+  public ResponseEntity<LeadResponse> createLead(@RequestBody CreateLeadRequest request) {
+    Lead lead = leadMapper.toEntity(request);
+    lead.setStatus("NEW");
+    lead.setCreatedAt(LocalDateTime.now());
+
+    Lead savedLead =
         leadService.addLead(
             lead.getFirstName(), lead.getEmail(), lead.getPhone(), lead.getStatus(), null);
 
-    java.net.URI location = java.net.URI.create("/api/leads/" + createdLead.getId());
-
-    return ResponseEntity.created(location).body(createdLead);
+    LeadResponse response = leadMapper.toResponse(savedLead);
+    URI location = URI.create("/api/leads/" + savedLead.getId());
+    return ResponseEntity.created(location).body(response);
   }
 
   @PutMapping("/{id}")
-  public ResponseEntity<Lead> updateLead(@PathVariable UUID id, @RequestBody Lead lead) {
-    Optional<Lead> updatedLeadOpt = leadService.updateLead(id, lead);
+  public ResponseEntity<LeadResponse> updateLead(
+      @PathVariable UUID id, @RequestBody UpdateLeadRequest request) {
+    Lead existingLead = leadService.findById(id).orElse(null);
+    if (existingLead == null) {
+      return ResponseEntity.notFound().build();
+    }
 
-    return updatedLeadOpt
-        .map(ResponseEntity::ok)
-        .orElseGet(() -> ResponseEntity.notFound().build());
+    leadMapper.updateEntity(request, existingLead);
+
+    Optional<Lead> updatedLeadOpt = leadService.updateLead(id, existingLead);
+    if (updatedLeadOpt.isEmpty()) {
+      return ResponseEntity.notFound().build();
+    }
+
+    LeadResponse response = leadMapper.toResponse(updatedLeadOpt.get());
+    return ResponseEntity.ok(response);
   }
 
   @DeleteMapping("/{id}")

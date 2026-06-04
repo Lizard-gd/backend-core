@@ -27,6 +27,9 @@ ext {
     jteVersion = '3.2.3'
 
     springBootVersion = '4.0.2'
+
+    mapstructVersion = '1.6.3'
+    lombokMapstructBindingVersion = '0.2.0'
 }
 
 dependencyManagement {
@@ -46,6 +49,11 @@ dependencyManagement {
 
     testImplementation "org.junit.jupiter:junit-jupiter:${junitVersion}"
     testImplementation "org.assertj:assertj-core:${assertjVersion}"
+
+    implementation "org.projectlombok:lombok-mapstruct-binding:${lombokMapstructBindingVersion}"
+
+    implementation "org.mapstruct:mapstruct:${mapstructVersion}"
+    annotationProcessor "org.mapstruct:mapstruct-processor:${mapstructVersion}"
 
     // Mockito для тестов
     testImplementation 'org.mockito:mockito-core:5.23.0'
@@ -188,7 +196,7 @@ spotless {
 
         targetExclude 'build/**', 'src/main/generated/**'
 
-         googleJavaFormat('1.35.0')
+        googleJavaFormat('1.35.0')
 
         removeUnusedImports()
 
@@ -196,4 +204,11 @@ spotless {
 
         endWithNewline()
     }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.compilerArgs += [
+            '-Amapstruct.defaultComponentModel=spring',
+            '-Amapstruct.unmappedTargetPolicy=ERROR'
+    ]
 }
