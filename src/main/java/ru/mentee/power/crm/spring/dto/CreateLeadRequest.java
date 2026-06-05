@@ -2,6 +2,7 @@ package ru.mentee.power.crm.spring.dto;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
 public class CreateLeadRequest {
@@ -11,14 +12,17 @@ public class CreateLeadRequest {
   private String email;
 
   @NotBlank(message = "Имя обязательно")
-  @Size(max = 255, message = "Имя не должно превышать 255 символов")
+  @Size(min = 2, max = 50, message = "Имя должно быть от 2 до 50 символов")
   private String firstName;
 
   @NotBlank(message = "Телефон обязателен")
   @Size(max = 15, message = "Телефон не должен превышать 15 символов")
+  @Pattern(
+      regexp = "^\\+[0-9]{6,15}$",
+      message = "Телефон должен начинаться с '+' и содержать 6-15 цифр")
   private String phone;
 
-  @Size(max = 255, message = "Название компании не должно превышать 255 символов")
+  @Size(max = 100, message = "Название компании не должно превышать 100 символов")
   private String company;
 
   public CreateLeadRequest() {}
