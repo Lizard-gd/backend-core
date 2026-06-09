@@ -3,7 +3,7 @@ package ru.mentee.power.crm.spring.rest;
 import static org.hamcrest.Matchers.emptyOrNullString;
 import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -16,7 +16,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,6 +36,7 @@ import ru.mentee.power.crm.service.LeadService;
 import ru.mentee.power.crm.service.ParentService;
 import ru.mentee.power.crm.spring.dto.CreateLeadRequest;
 import ru.mentee.power.crm.spring.dto.UpdateLeadRequest;
+import ru.mentee.power.crm.spring.exception.EntityNotFoundException;
 import tools.jackson.databind.ObjectMapper;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
@@ -92,12 +92,11 @@ class LeadRestControllerTest {
   void getLeadById_whenExists_shouldReturn200OkWithLead() throws Exception {
     UUID leadId = UUID.randomUUID();
     Lead lead = new Lead(leadId, "John", "john@test.com", "+121233", "NEW", LocalDateTime.now());
-    when(leadService.findById(leadId)).thenReturn(Optional.of(lead));
+    when(leadService.getLeadById(leadId)).thenReturn(lead);
 
     mockMvc
         .perform(get("/api/leads/{id}", leadId))
         .andExpect(status().isOk())
-        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
         .andExpect(jsonPath("$.id").value(leadId.toString()))
         .andExpect(jsonPath("$.firstName").value("John"));
   }
@@ -105,12 +104,13 @@ class LeadRestControllerTest {
   @Test
   void getLeadById_whenNotExists_shouldReturn404NotFound() throws Exception {
     UUID nonExistentId = UUID.randomUUID();
-    when(leadService.findById(nonExistentId)).thenReturn(Optional.empty());
+    when(leadService.getLeadById(nonExistentId))
+        .thenThrow(new EntityNotFoundException("Lead", nonExistentId.toString()));
 
     mockMvc
         .perform(get("/api/leads/{id}", nonExistentId))
         .andExpect(status().isNotFound())
-        .andExpect(content().string(emptyOrNullString()));
+        .andExpect(jsonPath("$.message").value("Lead not found with id: " + nonExistentId));
   }
 
   @Test
@@ -143,8 +143,8 @@ class LeadRestControllerTest {
         new Lead(
             leadId, "Bob Updated", "bob@test.com", "+999888", "QUALIFIED", LocalDateTime.now());
 
-    when(leadService.findById(leadId)).thenReturn(Optional.of(existingLead));
-    when(leadService.updateLead(eq(leadId), any(Lead.class))).thenReturn(Optional.of(updatedLead));
+    when(leadService.getLeadById(leadId)).thenReturn(existingLead);
+    when(leadService.updateLeadOrThrow(leadId, existingLead)).thenReturn(updatedLead);
 
     mockMvc
         .perform(
@@ -159,16 +159,18 @@ class LeadRestControllerTest {
   @Test
   void updateLead_whenNotExists_shouldReturn404NotFound() throws Exception {
     UUID nonExistentId = UUID.randomUUID();
-    Lead updatedLeadInput = new Lead();
-    when(leadService.updateLead(eq(nonExistentId), any(Lead.class))).thenReturn(Optional.empty());
+    UpdateLeadRequest updateRequest = new UpdateLeadRequest("any@test.com", "Any", "+111", "AnyCo");
+
+    when(leadService.getLeadById(nonExistentId))
+        .thenThrow(new EntityNotFoundException("Lead", nonExistentId.toString()));
 
     mockMvc
         .perform(
             put("/api/leads/{id}", nonExistentId)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(updatedLeadInput)))
+                .content(objectMapper.writeValueAsString(updateRequest)))
         .andExpect(status().isNotFound())
-        .andExpect(content().string(emptyOrNullString()));
+        .andExpect(jsonPath("$.message").value("Lead not found with id: " + nonExistentId));
   }
 
   @Test
@@ -185,11 +187,13 @@ class LeadRestControllerTest {
   @Test
   void deleteLead_whenNotExists_shouldReturn404NotFound() throws Exception {
     UUID nonExistentId = UUID.randomUUID();
-    when(leadService.deleteLead(nonExistentId)).thenReturn(false);
+    doThrow(new EntityNotFoundException("Lead", nonExistentId.toString()))
+        .when(leadService)
+        .deleteLeadOrThrow(nonExistentId);
 
     mockMvc
         .perform(delete("/api/leads/{id}", nonExistentId))
         .andExpect(status().isNotFound())
-        .andExpect(content().string(emptyOrNullString()));
+        .andExpect(jsonPath("$.message").value("Lead not found with id: " + nonExistentId));
   }
 }
