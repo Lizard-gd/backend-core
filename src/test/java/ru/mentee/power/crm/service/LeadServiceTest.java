@@ -28,6 +28,7 @@ import ru.mentee.power.crm.repository.DealRepository;
 import ru.mentee.power.crm.repository.LeadRepository;
 import ru.mentee.power.crm.spring.client.EmailValidationFeignClient;
 import ru.mentee.power.crm.spring.client.EmailValidationResponse;
+import ru.mentee.power.crm.spring.exception.EntityNotFoundException;
 
 @ExtendWith(MockitoExtension.class)
 class LeadServiceTest {
@@ -246,5 +247,94 @@ class LeadServiceTest {
     l.setStatus(status);
     l.setCreatedAt(createdAt);
     return l;
+  }
+
+  @Test
+  void getLeadById_shouldReturnLead_whenExists() {
+    UUID id = UUID.randomUUID();
+    Lead expectedLead = new Lead();
+    expectedLead.setId(id);
+    expectedLead.setFirstName("Existing");
+    when(repository.findById(id)).thenReturn(Optional.of(expectedLead));
+
+    Lead result = service.getLeadById(id);
+
+    assertThat(result).isEqualTo(expectedLead);
+    verify(repository).findById(id);
+  }
+
+  @Test
+  void getLeadById_shouldThrowEntityNotFoundException_whenNotFound() {
+    UUID id = UUID.randomUUID();
+    when(repository.findById(id)).thenReturn(Optional.empty());
+
+    assertThatThrownBy(() -> service.getLeadById(id))
+        .isInstanceOf(EntityNotFoundException.class)
+        .hasMessage("Lead not found with id: " + id);
+  }
+
+  @Test
+  void updateLeadOrThrow_shouldUpdateAndReturnLead_whenExists() {
+    UUID id = UUID.randomUUID();
+    Lead existingLead = new Lead();
+    existingLead.setId(id);
+    existingLead.setFirstName("Old");
+    existingLead.setEmail("old@test.com");
+    existingLead.setPhone("+000");
+    existingLead.setStatus("NEW");
+
+    Lead updatedLead = new Lead();
+    updatedLead.setFirstName("New");
+    updatedLead.setEmail("new@test.com");
+    updatedLead.setPhone("+111");
+    updatedLead.setStatus("QUALIFIED");
+    Company company = new Company();
+    company.setId(UUID.randomUUID());
+    updatedLead.setCompany(company);
+
+    when(repository.findById(id)).thenReturn(Optional.of(existingLead));
+    when(repository.save(any(Lead.class))).thenAnswer(inv -> inv.getArgument(0));
+
+    Lead result = service.updateLeadOrThrow(id, updatedLead);
+
+    assertThat(result.getFirstName()).isEqualTo("New");
+    assertThat(result.getEmail()).isEqualTo("new@test.com");
+    assertThat(result.getPhone()).isEqualTo("+111");
+    assertThat(result.getStatus()).isEqualTo("QUALIFIED");
+    assertThat(result.getCompany()).isEqualTo(company);
+    verify(repository).save(existingLead);
+  }
+
+  @Test
+  void updateLeadOrThrow_shouldThrowEntityNotFoundException_whenNotFound() {
+    UUID id = UUID.randomUUID();
+    Lead updatedLead = new Lead();
+    when(repository.findById(id)).thenReturn(Optional.empty());
+
+    assertThatThrownBy(() -> service.updateLeadOrThrow(id, updatedLead))
+        .isInstanceOf(EntityNotFoundException.class)
+        .hasMessage("Lead not found with id: " + id);
+  }
+
+  @Test
+  void deleteLeadOrThrow_shouldDelete_whenExists() {
+    UUID id = UUID.randomUUID();
+    when(repository.existsById(id)).thenReturn(true);
+    doNothing().when(repository).deleteById(id);
+
+    service.deleteLeadOrThrow(id);
+
+    verify(repository).existsById(id);
+    verify(repository).deleteById(id);
+  }
+
+  @Test
+  void deleteLeadOrThrow_shouldThrowEntityNotFoundException_whenNotFound() {
+    UUID id = UUID.randomUUID();
+    when(repository.existsById(id)).thenReturn(false);
+
+    assertThatThrownBy(() -> service.deleteLeadOrThrow(id))
+        .isInstanceOf(EntityNotFoundException.class)
+        .hasMessage("Lead not found with id: " + id);
   }
 }

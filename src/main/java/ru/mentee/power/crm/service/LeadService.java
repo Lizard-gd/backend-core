@@ -26,6 +26,7 @@ import ru.mentee.power.crm.repository.DealRepository;
 import ru.mentee.power.crm.repository.LeadRepository;
 import ru.mentee.power.crm.spring.client.EmailValidationFeignClient;
 import ru.mentee.power.crm.spring.client.EmailValidationResponse;
+import ru.mentee.power.crm.spring.exception.EntityNotFoundException;
 
 @Service
 public class LeadService {
@@ -135,6 +136,31 @@ public class LeadService {
 
   public Optional<Lead> findByEmail(String email) {
     return repository.findByEmailNative(email);
+  }
+
+  public Lead getLeadById(UUID id) {
+    return repository
+        .findById(id)
+        .orElseThrow(() -> new EntityNotFoundException("Lead", id.toString()));
+  }
+
+  public Lead updateLeadOrThrow(UUID id, Lead updatedLead) {
+    Lead existing = getLeadById(id);
+    existing.setFirstName(updatedLead.getFirstName());
+    existing.setEmail(updatedLead.getEmail());
+    existing.setPhone(updatedLead.getPhone());
+    existing.setStatus(updatedLead.getStatus());
+    if (updatedLead.getCompany() != null) {
+      existing.setCompany(updatedLead.getCompany());
+    }
+    return repository.save(existing);
+  }
+
+  public void deleteLeadOrThrow(UUID id) {
+    if (!repository.existsById(id)) {
+      throw new EntityNotFoundException("Lead", id.toString());
+    }
+    repository.deleteById(id);
   }
 
   @Transactional

@@ -1,11 +1,9 @@
 package ru.mentee.power.crm.spring.rest;
 
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotNull;
 import java.net.URI;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -45,12 +43,8 @@ public class LeadRestController {
   }
 
   @GetMapping("/{id}")
-  public ResponseEntity<LeadResponse> getLeadById(
-      @PathVariable @NotNull(message = "ID лида обязателен!") UUID id) {
-    Lead lead = leadService.findById(id).orElse(null);
-    if (lead == null) {
-      return ResponseEntity.notFound().build();
-    }
+  public ResponseEntity<LeadResponse> getLeadById(@PathVariable UUID id) {
+    Lead lead = leadService.getLeadById(id);
     LeadResponse response = leadMapper.toResponse(lead);
     return ResponseEntity.ok(response);
   }
@@ -72,32 +66,17 @@ public class LeadRestController {
 
   @PutMapping("/{id}")
   public ResponseEntity<LeadResponse> updateLead(
-      @PathVariable @NotNull(message = "ID лида обязателен!") UUID id,
-      @RequestBody UpdateLeadRequest request) {
-    Lead existingLead = leadService.findById(id).orElse(null);
-    if (existingLead == null) {
-      return ResponseEntity.notFound().build();
-    }
-
+      @PathVariable UUID id, @RequestBody UpdateLeadRequest request) {
+    Lead existingLead = leadService.getLeadById(id);
     leadMapper.updateEntity(request, existingLead);
-
-    Optional<Lead> updatedLeadOpt = leadService.updateLead(id, existingLead);
-    if (updatedLeadOpt.isEmpty()) {
-      return ResponseEntity.notFound().build();
-    }
-
-    LeadResponse response = leadMapper.toResponse(updatedLeadOpt.get());
+    Lead updatedLead = leadService.updateLeadOrThrow(id, existingLead);
+    LeadResponse response = leadMapper.toResponse(updatedLead);
     return ResponseEntity.ok(response);
   }
 
   @DeleteMapping("/{id}")
-  public ResponseEntity<Void> deleteLead(
-      @PathVariable @NotNull(message = "ID лида обязателен!") UUID id) {
-    boolean deleted = leadService.deleteLead(id);
-    if (deleted) {
-      return ResponseEntity.noContent().build();
-    } else {
-      return ResponseEntity.notFound().build();
-    }
+  public ResponseEntity<Void> deleteLead(@PathVariable UUID id) {
+    leadService.deleteLeadOrThrow(id);
+    return ResponseEntity.noContent().build();
   }
 }
