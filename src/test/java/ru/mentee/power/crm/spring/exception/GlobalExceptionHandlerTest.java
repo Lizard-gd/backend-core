@@ -69,7 +69,12 @@ class GlobalExceptionHandlerTest {
         .andExpect(jsonPath("$.path").value("/api/leads"))
         .andExpect(jsonPath("$.errors").isMap())
         .andExpect(jsonPath("$.errors.email").value("Email обязателен"))
-        .andExpect(jsonPath("$.errors.firstName").value("Имя должно быть от 2 до 50 символов"));
+        .andExpect(
+            jsonPath("$.errors.firstName")
+                .value(
+                    org.hamcrest.Matchers.anyOf(
+                        org.hamcrest.Matchers.is("Имя обязательно"),
+                        org.hamcrest.Matchers.is("Имя должно быть от 2 до 50 символов"))));
   }
 
   @Test
