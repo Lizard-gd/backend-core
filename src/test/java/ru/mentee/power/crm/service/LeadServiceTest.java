@@ -337,4 +337,76 @@ class LeadServiceTest {
         .isInstanceOf(EntityNotFoundException.class)
         .hasMessage("Lead not found with id: " + id);
   }
+
+  @Test
+  void updateLead_shouldReturnUpdatedLead_whenLeadExists() {
+    UUID leadId = UUID.randomUUID();
+    Lead existingLead = new Lead();
+    existingLead.setId(leadId);
+    existingLead.setFirstName("Old");
+    existingLead.setEmail("old@test.com");
+    existingLead.setPhone("+1111111111");
+    existingLead.setStatus("NEW");
+
+    Lead updatedLeadData = new Lead();
+    updatedLeadData.setFirstName("New");
+    updatedLeadData.setEmail("new@test.com");
+    updatedLeadData.setPhone("+2222222222");
+    updatedLeadData.setStatus("QUALIFIED");
+
+    when(repository.findById(leadId)).thenReturn(Optional.of(existingLead));
+    when(repository.save(any(Lead.class))).thenAnswer(inv -> inv.getArgument(0));
+
+    Optional<Lead> result = service.updateLead(leadId, updatedLeadData);
+
+    assertThat(result).isPresent();
+    Lead updatedLead = result.get();
+    assertThat(updatedLead.getId()).isEqualTo(leadId);
+    assertThat(updatedLead.getFirstName()).isEqualTo("New");
+    assertThat(updatedLead.getEmail()).isEqualTo("new@test.com");
+    assertThat(updatedLead.getPhone()).isEqualTo("+2222222222");
+    assertThat(updatedLead.getStatus()).isEqualTo("QUALIFIED");
+
+    verify(repository).findById(leadId);
+    verify(repository).save(existingLead);
+  }
+
+  @Test
+  void updateLead_shouldReturnEmptyOptional_whenLeadDoesNotExist() {
+    UUID leadId = UUID.randomUUID();
+    Lead updatedLeadData = new Lead();
+
+    when(repository.findById(leadId)).thenReturn(Optional.empty());
+
+    Optional<Lead> result = service.updateLead(leadId, updatedLeadData);
+
+    assertThat(result).isEmpty();
+    verify(repository).findById(leadId);
+    verify(repository, never()).save(any());
+  }
+
+  @Test
+  void deleteLead_shouldReturnTrue_whenLeadExists() {
+    UUID leadId = UUID.randomUUID();
+    when(repository.existsById(leadId)).thenReturn(true);
+    doNothing().when(repository).deleteById(leadId);
+
+    boolean result = service.deleteLead(leadId);
+
+    assertThat(result).isTrue();
+    verify(repository).existsById(leadId);
+    verify(repository).deleteById(leadId);
+  }
+
+  @Test
+  void deleteLead_shouldReturnFalse_whenLeadDoesNotExist() {
+    UUID leadId = UUID.randomUUID();
+    when(repository.existsById(leadId)).thenReturn(false);
+
+    boolean result = service.deleteLead(leadId);
+
+    assertThat(result).isFalse();
+    verify(repository).existsById(leadId);
+    verify(repository, never()).deleteById(any());
+  }
 }
