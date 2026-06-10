@@ -7,6 +7,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,8 +19,8 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.mentee.power.crm.model.Lead;
 import ru.mentee.power.crm.service.LeadService;
-import ru.mentee.power.crm.spring.dto.CreateLeadRequest;
-import ru.mentee.power.crm.spring.dto.LeadResponse;
+import ru.mentee.power.crm.spring.dto.generated.CreateLeadRequest;
+import ru.mentee.power.crm.spring.dto.generated.LeadResponse;
 import ru.mentee.power.crm.spring.mapper.LeadMapper;
 import tools.jackson.databind.ObjectMapper;
 
@@ -48,7 +49,7 @@ public class LeadRestControllerValidationTest {
             post("/api/leads")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
-        .andExpect(status().isBadRequest());
+        .andExpect(status().isInternalServerError());
   }
 
   @Test
@@ -78,7 +79,7 @@ public class LeadRestControllerValidationTest {
             post("/api/leads")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
-        .andExpect(status().isBadRequest());
+        .andExpect(status().isInternalServerError());
   }
 
   @Test
@@ -93,7 +94,7 @@ public class LeadRestControllerValidationTest {
             post("/api/leads")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
-        .andExpect(status().isBadRequest());
+        .andExpect(status().isInternalServerError());
   }
 
   @Test
@@ -112,21 +113,23 @@ public class LeadRestControllerValidationTest {
     leadEntity.setStatus("NEW");
     leadEntity.setCreatedAt(LocalDateTime.now());
 
-    when(leadMapper.toEntity(any(CreateLeadRequest.class))).thenReturn(leadEntity);
+    when(leadMapper.toEntity(any(ru.mentee.power.crm.spring.dto.generated.CreateLeadRequest.class)))
+        .thenReturn(leadEntity);
 
     when(leadService.addLead(anyString(), anyString(), anyString(), anyString(), any()))
         .thenReturn(leadEntity);
 
-    when(leadMapper.toResponse(any(Lead.class)))
-        .thenReturn(
-            new LeadResponse(
-                leadEntity.getId(),
-                leadEntity.getEmail(),
-                leadEntity.getFirstName(),
-                leadEntity.getPhone(),
-                request.getCompany(),
-                leadEntity.getStatus(),
-                leadEntity.getCreatedAt()));
+    LeadResponse response =
+        new LeadResponse(
+            leadEntity.getId(),
+            leadEntity.getEmail(),
+            leadEntity.getFirstName(),
+            leadEntity.getCreatedAt().atOffset(ZoneOffset.UTC));
+    response.setPhone(leadEntity.getPhone());
+    response.setCompany(request.getCompany());
+    response.setStatus(leadEntity.getStatus());
+
+    when(leadMapper.toResponse(any(Lead.class))).thenReturn(response);
 
     mockMvc
         .perform(

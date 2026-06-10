@@ -32,6 +32,13 @@ spring:
           email-validation:
             connect-timeout: 3000
             read-timeout: 5000
+  springdoc:
+    api-docs:
+      path: /v3/api-docs
+    swagger-ui:
+      path: /swagger-ui.html
+      operationsSorter: method
+      tagsSorter: alpha
 
 # Внешние API
 email:

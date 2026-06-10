@@ -7,6 +7,7 @@ plugins {
     id 'org.springframework.boot' version '4.0.2'
     id 'io.spring.dependency-management' version '1.1.7'
     id 'com.diffplug.spotless' version '8.4.0'
+    id 'org.openapi.generator' version '7.20.0'
 }
 
 group = 'ru.mentee.power'
@@ -30,6 +31,9 @@ ext {
 
     mapstructVersion = '1.6.3'
     lombokMapstructBindingVersion = '0.2.0'
+
+    openApiGeneratorVersion = '7.20.0'
+    springdocVersion = '3.0.3'
 }
 
 dependencyManagement {
@@ -102,6 +106,10 @@ dependencyManagement {
     // Resilience4j (retry, circuit breaker)
     implementation 'io.github.resilience4j:resilience4j-spring-boot3'
     implementation 'io.github.resilience4j:resilience4j-feign'
+
+    implementation 'org.openapitools:jackson-databind-nullable:0.2.9'
+
+    implementation "org.springdoc:springdoc-openapi-starter-webmvc-ui:${springdocVersion}"
 }
 
 checkstyle {
@@ -113,6 +121,15 @@ checkstyle {
 
 tasks.withType(Checkstyle).configureEach {
     group = 'verification'
+    exclude '**/build/generated/**'
+}
+
+checkstyleMain {
+    source = fileTree(dir: "${project.projectDir}/src/main/java", excludes: ['**/generated/**', '**/build/**'])
+}
+
+checkstyleTest {
+    source = fileTree(dir: "${project.projectDir}/src/test/java", excludes: ['**/generated/**', '**/build/**'])
 }
 
 // Настройка JaCoCo
@@ -139,6 +156,9 @@ jacocoTestReport {
         html.required = true
         html.outputLocation = layout.buildDirectory.dir('reports/jacoco/test/html')
     }
+    classDirectories.setFrom(files(classDirectories.files.collect {
+        fileTree(dir: it, exclude: ['**/generated/**', '**/dto/generated/**', '**/rest/generated/**'])
+    }))
 }
 
 // Настройка проверки покрытия (минимум 80%)
@@ -151,6 +171,9 @@ jacocoTestCoverageVerification {
             }
         }
     }
+    classDirectories.setFrom(files(classDirectories.files.collect {
+        fileTree(dir: it, exclude: ['**/generated/**', '**/dto/generated/**', '**/rest/generated/**'])
+    }))
 }
 
 // Интеграция проверок в lifecycle
@@ -212,3 +235,28 @@ tasks.withType(JavaCompile).configureEach {
             '-Amapstruct.unmappedTargetPolicy=ERROR'
     ]
 }
+
+openApiGenerate {
+    generatorName = "spring"
+    inputSpec = "${rootProject.projectDir}/src/main/resources/api/api-spec.yaml"
+    outputDir = "${buildDir}/generated"
+    apiPackage = "ru.mentee.power.crm.spring.rest.generated"
+    modelPackage = "ru.mentee.power.crm.spring.dto.generated"
+    configOptions = [
+            interfaceOnly: "true",
+            useTags: "true",
+            dateLibrary: "java8",
+            useSpringBoot3: "true",
+            documentationProvider: "none"
+    ]
+}
+
+sourceSets {
+    main {
+        java {
+            srcDir "${buildDir}/generated/src/main/java"
+        }
+    }
+}
+
+compileJava.dependsOn tasks.openApiGenerate

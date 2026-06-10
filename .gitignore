@@ -45,3 +45,9 @@ opencode.yaml
 
 ### Mac OS ###
 .DS_Store
+
+# JTE сгенерированные файлы
+build/jte/
+build/generated/
+jte-classes/
+*.class
