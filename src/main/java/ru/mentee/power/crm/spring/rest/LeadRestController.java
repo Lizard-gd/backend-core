@@ -3,8 +3,10 @@ package ru.mentee.power.crm.spring.rest;
 import java.net.URI;
 import java.util.List;
 import java.util.UUID;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 import ru.mentee.power.crm.model.Lead;
 import ru.mentee.power.crm.service.LeadService;
 import ru.mentee.power.crm.spring.dto.generated.CreateLeadRequest;
@@ -31,8 +33,37 @@ public class LeadRestController implements LeadManagementApi {
     return ResponseEntity.ok(responses);
   }
 
+  private void validateUpdateRequest(UpdateLeadRequest request) {
+    if (request.getEmail() == null || request.getEmail().isBlank()) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Email is required");
+    }
+    if (request.getFirstName() == null || request.getFirstName().length() < 2) {
+      throw new ResponseStatusException(
+          HttpStatus.BAD_REQUEST, "First name must be at least 1 character");
+    }
+    if (request.getPhone() != null && !request.getPhone().matches("^\\+[0-9]{6,15}$")) {
+      throw new ResponseStatusException(
+          HttpStatus.BAD_REQUEST, "Phone must start with '+' and contain 6-15 digits");
+    }
+  }
+
+  private void validateCreateRequest(CreateLeadRequest request) {
+    if (request.getEmail() == null || request.getEmail().isBlank()) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Email is required");
+    }
+    if (request.getFirstName() == null || request.getFirstName().length() < 2) {
+      throw new ResponseStatusException(
+          HttpStatus.BAD_REQUEST, "First name must be at least 1 character");
+    }
+    if (request.getPhone() != null && !request.getPhone().matches("^\\+[0-9]{6,15}$")) {
+      throw new ResponseStatusException(
+          HttpStatus.BAD_REQUEST, "Phone must start with '+' and contain 6-15 digits");
+    }
+  }
+
   @Override
   public ResponseEntity<LeadResponse> createLead(CreateLeadRequest createLeadRequest) {
+    validateCreateRequest(createLeadRequest);
     Lead lead = leadMapper.toEntity(createLeadRequest);
     lead.setStatus("NEW");
     lead.setCreatedAt(java.time.LocalDateTime.now());
@@ -55,6 +86,7 @@ public class LeadRestController implements LeadManagementApi {
 
   @Override
   public ResponseEntity<LeadResponse> updateLead(UUID id, UpdateLeadRequest updateLeadRequest) {
+    validateUpdateRequest(updateLeadRequest);
     Lead existing = leadService.getLeadById(id);
     leadMapper.updateEntity(updateLeadRequest, existing);
     Lead updated = leadService.updateLeadOrThrow(id, existing);
