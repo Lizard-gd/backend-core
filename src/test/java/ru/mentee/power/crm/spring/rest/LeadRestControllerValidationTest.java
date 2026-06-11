@@ -49,7 +49,7 @@ public class LeadRestControllerValidationTest {
             post("/api/leads")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
-        .andExpect(status().isInternalServerError());
+        .andExpect(status().isBadRequest());
   }
 
   @Test
@@ -79,7 +79,7 @@ public class LeadRestControllerValidationTest {
             post("/api/leads")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
-        .andExpect(status().isInternalServerError());
+        .andExpect(status().isBadRequest());
   }
 
   @Test
@@ -94,7 +94,7 @@ public class LeadRestControllerValidationTest {
             post("/api/leads")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
-        .andExpect(status().isInternalServerError());
+        .andExpect(status().isBadRequest());
   }
 
   @Test

@@ -90,7 +90,7 @@ class LeadLockingServiceTest {
 
   @Test
   void shouldThrowOptimisticLockException_whenConcurrentUpdateWithoutLock() throws Exception {
-    ExecutorService executor = Executors.newFixedThreadPool(2);
+    ExecutorService executor = Executors.newFixedThreadPool(5);
     CountDownLatch startLatch = new CountDownLatch(1);
     CountDownLatch doneLatch = new CountDownLatch(2);
 
