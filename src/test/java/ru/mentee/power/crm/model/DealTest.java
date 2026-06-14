@@ -69,4 +69,23 @@ class DealTest {
     assertThat(deal1).isEqualTo(deal2);
     assertThat(deal1.hashCode()).isEqualTo(deal2.hashCode());
   }
+
+  @Test
+  void transitionToPause_shouldWorkFromNegotiation() {
+    Deal deal = new Deal("lead-1", BigDecimal.TEN);
+    deal.transitionTo(DealStatus.QUALIFIED);
+    deal.transitionTo(DealStatus.PROPOSAL_SENT);
+    deal.transitionTo(DealStatus.NEGOTIATION);
+    deal.transitionTo(DealStatus.PAUSE);
+    assertThat(deal.getStatus()).isEqualTo(DealStatus.PAUSE);
+  }
+
+  @Test
+  void transitionFromPauseToQualified_shouldWork() {
+    Deal deal = new Deal("lead-1", BigDecimal.TEN);
+    deal.transitionTo(DealStatus.QUALIFIED);
+    deal.transitionTo(DealStatus.PAUSE);
+    deal.transitionTo(DealStatus.QUALIFIED);
+    assertThat(deal.getStatus()).isEqualTo(DealStatus.QUALIFIED);
+  }
 }

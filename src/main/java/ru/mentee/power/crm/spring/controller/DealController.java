@@ -73,4 +73,27 @@ public class DealController {
     }
     return "redirect:/deals/kanban";
   }
+
+  @PostMapping("/{id}/pause")
+  public String pauseDeal(@PathVariable String id, RedirectAttributes redirectAttributes) {
+    try {
+      dealService.transitionDealStatus(id, DealStatus.PAUSE);
+    } catch (IllegalStateException e) {
+      redirectAttributes.addFlashAttribute("error", "Cannot pause deal: " + e.getMessage());
+    }
+    return "redirect:/deals/kanban";
+  }
+
+  @PostMapping("/{id}/resume")
+  public String resumeDeal(
+      @PathVariable String id,
+      @RequestParam DealStatus targetStatus,
+      RedirectAttributes redirectAttributes) {
+    try {
+      dealService.transitionDealStatus(id, targetStatus);
+    } catch (IllegalStateException e) {
+      redirectAttributes.addFlashAttribute("error", "Cannot resume: " + e.getMessage());
+    }
+    return "redirect:/deals/kanban";
+  }
 }

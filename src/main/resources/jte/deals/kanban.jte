@@ -22,22 +22,24 @@
                     <h2 class="font-bold text-lg mb-4 text-center">${status}</h2>
                     <div class="space-y-3">
                         @for(Deal deal : dealsByStatus.getOrDefault(status, java.util.List.of()))
-                            <div class="bg-white p-3 rounded border border-gray-200 shadow-sm">
-                                <p class="font-semibold">${deal.getAmount()} ₽</p>
-                                <p class="text-sm text-gray-600 truncate">Lead: ${deal.getLeadId()}</p>
-                                <form method="post" action="/deals/${deal.getId()}/transition" class="mt-2">
-                                    <select name="newStatus" class="text-sm border rounded p-1 w-full">
-                                        @for(DealStatus possible : DealStatus.values())
-                                            <option value="${possible}" ?disabled="${deal.getStatus() == possible}">
-                                                ${possible}
-                                            </option>
-                                        @endfor
-                                    </select>
-                                    <button type="submit" class="mt-2 w-full bg-blue-500 text-white text-sm py-1 rounded hover:bg-blue-600">
-                                        Перевести
-                                    </button>
-                                </form>
-                            </div>
+                            @if(!deal.getStatus().getAllowedTransitions().isEmpty())
+                                <div class="bg-white p-3 rounded border border-gray-200 shadow-sm">
+                                    <p class="font-semibold">${deal.getAmount()} ₽</p>
+                                    <p class="text-sm text-gray-600 truncate">Lead: ${deal.getLeadId()}</p>
+                                    <form method="post" action="/deals/${deal.getId()}/transition" class="mt-2">
+                                        <select name="newStatus" class="text-sm border rounded p-1 w-full">
+                                            @for(DealStatus target : deal.getStatus().getAllowedTransitions())
+                                                <option value="${target}" ?disabled="${target == deal.getStatus()}">
+                                                    ${target}
+                                                </option>
+                                            @endfor
+                                        </select>
+                                        <button type="submit" class="mt-2 w-full ${deal.getStatus() == DealStatus.PAUSE ? "bg-orange-500 hover:bg-orange-600" : "bg-blue-500 hover:bg-blue-600"} text-white text-sm py-1 rounded">
+                                            ${deal.getStatus() == DealStatus.PAUSE ? "Снять паузу" : "Перевести"}
+                                        </button>
+                                    </form>
+                                </div>
+                            @endif
                         @endfor
                     </div>
                 </div>

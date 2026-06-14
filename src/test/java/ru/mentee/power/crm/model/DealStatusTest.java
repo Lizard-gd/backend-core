@@ -2,6 +2,7 @@ package ru.mentee.power.crm.model;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.Set;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -10,35 +11,35 @@ class DealStatusTest {
 
   @ParameterizedTest
   @CsvSource({
-    "NEW, QUALIFIED, true",
-    "NEW, LOST, true",
-    "NEW, PROPOSAL_SENT, false",
-    "NEW, WON, false",
-    "QUALIFIED, PROPOSAL_SENT, true",
-    "QUALIFIED, LOST, true",
-    "QUALIFIED, WON, false",
-    "PROPOSAL_SENT, NEGOTIATION, true",
-    "PROPOSAL_SENT, LOST, true",
-    "PROPOSAL_SENT, WON, false",
-    "NEGOTIATION, WON, true",
-    "NEGOTIATION, LOST, true",
-    "NEGOTIATION, QUALIFIED, false",
-    "WON, NEW, false",
-    "WON, LOST, false",
-    "LOST, QUALIFIED, false"
+    "QUALIFIED, PAUSE, true",
+    "PROPOSAL_SENT, PAUSE, true",
+    "NEGOTIATION, PAUSE, true",
+    "NEW, PAUSE, false",
+    "WON, PAUSE, false",
+    "LOST, PAUSE, false",
+    "PAUSE, QUALIFIED, true",
+    "PAUSE, PROPOSAL_SENT, true",
+    "PAUSE, NEGOTIATION, true",
+    "PAUSE, NEW, false",
+    "PAUSE, WON, false",
+    "PAUSE, LOST, false",
+    "PAUSE, PAUSE, false"
   })
-  void shouldValidateTransitions(DealStatus from, DealStatus to, boolean expected) {
+  void shouldValidateTransitionsWithPause(DealStatus from, DealStatus to, boolean expected) {
     assertThat(from.canTransitionTo(to)).isEqualTo(expected);
   }
 
   @Test
-  void terminalStates_shouldNotAllowAnyTransitions() {
-    for (DealStatus terminal : new DealStatus[] {DealStatus.WON, DealStatus.LOST}) {
-      for (DealStatus target : DealStatus.values()) {
-        assertThat(terminal.canTransitionTo(target))
-            .as("Checking %s -> %s", terminal, target)
-            .isFalse();
-      }
-    }
+  void getAllowedTransitions_shouldReturnCorrectSetForPause() {
+    Set<DealStatus> allowed = DealStatus.PAUSE.getAllowedTransitions();
+    assertThat(allowed)
+        .containsExactlyInAnyOrder(
+            DealStatus.QUALIFIED, DealStatus.PROPOSAL_SENT, DealStatus.NEGOTIATION);
+  }
+
+  @Test
+  void getAllowedTransitions_forTerminalStates_shouldReturnEmpty() {
+    assertThat(DealStatus.WON.getAllowedTransitions()).isEmpty();
+    assertThat(DealStatus.LOST.getAllowedTransitions()).isEmpty();
   }
 }
