@@ -5,14 +5,15 @@ import java.util.HashMap;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.*;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
-import ru.mentee.power.crm.spring.rest.fixed.exception.EmailAlreadyExistsException;
-import ru.mentee.power.crm.spring.rest.fixed.exception.InvalidStatusException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
@@ -78,25 +79,5 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     log.error("Unexpected error occurred while processing request: {}", path, ex);
 
     return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
-  }
-
-  // Ниже три метода для задания BCORE-41(fixed.invitee)
-  @ExceptionHandler(EntityNotFoundException.class)
-  public ResponseEntity<ProblemDetail> handleNotFound(EntityNotFoundException ex) {
-    ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, ex.getMessage());
-    return ResponseEntity.status(HttpStatus.NOT_FOUND).body(problem);
-  }
-
-  @ExceptionHandler(EmailAlreadyExistsException.class)
-  public ResponseEntity<ProblemDetail> handleEmailExists(EmailAlreadyExistsException ex) {
-    ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, ex.getMessage());
-    return ResponseEntity.status(HttpStatus.CONFLICT).body(problem);
-  }
-
-  @ExceptionHandler(InvalidStatusException.class)
-  public ResponseEntity<ProblemDetail> handleInvalidStatus(InvalidStatusException ex) {
-    ProblemDetail problem =
-        ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, ex.getMessage());
-    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(problem);
   }
 }
